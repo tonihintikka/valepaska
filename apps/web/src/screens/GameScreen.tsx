@@ -4,12 +4,17 @@ import { ActionBar } from '../components/ActionBar';
 import { ChallengeModal } from '../components/ChallengeModal';
 import { EventLog } from '../components/EventLog';
 import { DebugPanel } from '../components/DebugPanel';
+import { VictoryOverlay } from '../components/VictoryOverlay';
 import { useGameStore } from '../store/game-store';
 
 export function GameScreen() {
   const showChallengeModal = useGameStore((state) => state.showChallengeModal);
   const debugMode = useGameStore((state) => state.debugMode);
   const isSpectator = useGameStore((state) => state.isSpectator);
+  const showVictoryOverlay = useGameStore((state) => state.showVictoryOverlay);
+  const pendingWinnerId = useGameStore((state) => state.pendingWinnerId);
+  const playerConfigs = useGameStore((state) => state.playerConfigs);
+  const dismissVictoryOverlay = useGameStore((state) => state.dismissVictoryOverlay);
 
   return (
     <div className="h-full w-full flex flex-col bg-bg-deep overflow-hidden">
@@ -51,6 +56,21 @@ export function GameScreen() {
 
       {/* Challenge modal */}
       {showChallengeModal && !isSpectator && <ChallengeModal />}
+
+      {/* Victory overlay */}
+      {showVictoryOverlay && pendingWinnerId && (() => {
+        const winner = playerConfigs.find((p) => p.id === pendingWinnerId);
+        if (!winner) return null;
+        
+        return (
+          <VictoryOverlay
+            winnerId={pendingWinnerId}
+            winnerName={winner.name}
+            winnerAvatar={winner.avatar}
+            onComplete={dismissVictoryOverlay}
+          />
+        );
+      })()}
 
       {/* Debug panel */}
       {debugMode && <DebugPanel />}

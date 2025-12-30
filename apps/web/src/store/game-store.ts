@@ -32,6 +32,8 @@ interface GameStore {
   showChallengeModal: boolean;
   challengeTimeLeft: number;
   isProcessingBots: boolean;
+  showVictoryOverlay: boolean;
+  pendingWinnerId: PlayerId | null;
   
   // Debug/Spectator
   debugMode: boolean;
@@ -58,6 +60,7 @@ interface GameStore {
   processBotTurn: () => void;
   processBotChallenges: () => void;
   handleEvent: (event: GameEvent) => void;
+  dismissVictoryOverlay: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -77,6 +80,8 @@ export const useGameStore = create<GameStore>()(
     showChallengeModal: false,
     challengeTimeLeft: 0,
     isProcessingBots: false,
+    showVictoryOverlay: false,
+    pendingWinnerId: null,
     
     debugMode: false,
     isSpectator: false,
@@ -158,6 +163,8 @@ export const useGameStore = create<GameStore>()(
         selectedRank: null,
         showChallengeModal: false,
         isProcessingBots: false,
+        showVictoryOverlay: false,
+        pendingWinnerId: null,
         debugMode: false,
         isSpectator: false,
       });
@@ -421,14 +428,25 @@ export const useGameStore = create<GameStore>()(
       set({ events: [...events, event] });
       
       if (event.type === 'PLAYER_WON') {
+        // Show victory overlay first, then transition to game over
         set({ 
-          uiPhase: 'gameOver', 
-          winnerId: event.playerId,
+          showVictoryOverlay: true,
+          pendingWinnerId: event.winnerId,
           showChallengeModal: false,
         });
       }
       
       get().updateObservation();
+    },
+    
+    dismissVictoryOverlay: () => {
+      const { pendingWinnerId } = get();
+      set({ 
+        showVictoryOverlay: false,
+        uiPhase: 'gameOver',
+        winnerId: pendingWinnerId,
+        pendingWinnerId: null,
+      });
     },
   }))
 );
