@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
+import { Logo } from '../components/Logo';
 
 export function GameOverScreen() {
   const winnerId = useGameStore((state) => state.winnerId);
@@ -52,6 +53,11 @@ export function GameOverScreen() {
       <div className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl ${
         isHumanWinner ? 'bg-accent-gold/20' : 'bg-accent-ice/10'
       }`} />
+
+      {/* Logo at top */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
+        <Logo size="sm" variant="dark" animate={false} />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}

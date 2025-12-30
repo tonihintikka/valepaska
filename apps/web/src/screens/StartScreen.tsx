@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
+import { Logo } from '../components/Logo';
 import type { BotDifficulty, PlayerConfig } from '../types';
 
 const AVATARS = ['👤', '🤖', '🎩', '🃏', '🦊', '🎭'];
@@ -119,15 +120,8 @@ export function StartScreen() {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-2xl px-4"
       >
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-5xl font-serif font-bold text-accent-gold mb-2 text-center text-shadow-gold"
-        >
-          Valepaska
-        </motion.h1>
+        {/* Title with tilted card logo */}
+        <Logo size="md" variant="gold" className="mb-2" />
         
         <motion.p
           initial={{ opacity: 0 }}

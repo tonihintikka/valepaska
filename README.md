@@ -2,6 +2,8 @@
 
 A TypeScript-based card game engine for "Valepaska" (Finnish Bullshit), a bluffing card game for 3-6 players.
 
+![Valepaska Screenshot](docs/screenshot.png)
+
 ## Features
 
 - **Game Engine** (`@valepaska/core`): Deterministic game engine with seeded RNG
