@@ -23,11 +23,32 @@ export function scoreMove(
   }
 
   // Burn moves are valuable (if honest or we're aggressive)
+  // NEW RULES:
+  // - 10 burns number cards (3-9) only
+  // - A burns face cards (J, Q, K) only
   if (move.claimRank === '10' || move.claimRank === 'A') {
+    // If this burn rank is in validClaimRanks, it means we CAN play it
+    // (engine already validates 10 on numbers, A on faces)
+    const pileBonus = Math.min(observation.tablePileSize * 0.5, 4);
+    
     if (move.isHonest) {
-      score += 5; // Honest burn is great
+      score += 5 + pileBonus; // Honest burn is great, especially big piles
     } else {
-      score += 2; // Bluff burn is risky but high reward
+      score += 2 + pileBonus; // Bluff burn is risky but high reward on big piles
+    }
+  }
+  
+  // Strategic: reaching 7 enables face cards and eventual A burn
+  // Encourage progression toward face card territory
+  const lastRank = observation.lastClaimRank;
+  if (lastRank && ['5', '6'].includes(lastRank) && move.claimRank === '7') {
+    score += 2; // Reaching 7 opens up face cards → eventual A burn
+  }
+  
+  // Strategic: on face cards (J, Q, K), A is valuable for burning
+  if (lastRank && ['J', 'Q', 'K'].includes(lastRank) && move.claimRank === 'A') {
+    if (move.isHonest) {
+      score += 3; // A on face cards burns - very valuable
     }
   }
 

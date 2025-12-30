@@ -452,7 +452,8 @@ export class GameEngine {
         ...this.state,
         hands: newHands,
         tablePile: [],
-        claimHistory: newClaimHistory,
+        // Reset claim history when pile is cleared (next claim starts fresh)
+        claimHistory: [],
         lastPlay: null,
         phase: 'WAITING_FOR_PLAY',
       };
