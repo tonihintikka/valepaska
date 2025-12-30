@@ -1,0 +1,31 @@
+{
+  "name": "@valepaska/simulator",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Valepaska game simulator CLI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "valepaska-sim": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@valepaska/bots": "workspace:*",
+    "@valepaska/core": "workspace:*",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "vite": "^6.0.5",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.8"
+  }
+}
+

@@ -1,0 +1,105 @@
+# Valepaska Project - Cursor Rules
+
+## Project Overview
+Valepaska is a TypeScript-based bluffing card game engine with AI bots and web UI.
+
+## Architecture
+- **Monorepo:** pnpm workspaces
+- **Packages:**
+  - `@valepaska/core` - Game engine, rules, types
+  - `@valepaska/bots` - Rule-based AI bots (Easy/Normal/Hard/Pro)
+  - `@valepaska/simulator` - CLI for batch simulations
+  - `apps/web` - React web UI (in development)
+
+## Technology Stack (December 2025)
+- **Runtime:** Node.js 22 LTS
+- **Language:** TypeScript 5.7 (strict mode)
+- **Build:** Vite 6
+- **Testing:** Vitest
+- **Web UI:** React 19 + Tailwind CSS 4 + Framer Motion 12 + Zustand 5
+- **Linting:** ESLint 9 (flat config) + Prettier
+
+## Code Style Guidelines
+
+### TypeScript
+- Use `strict: true` always
+- Prefer `readonly` for immutable data
+- Use explicit return types on public functions
+- Prefer `type` over `interface` for unions
+- Use `as const` for literal types
+
+### React (Web UI)
+- Functional components only
+- Use hooks for all state/effects
+- Prefer composition over inheritance
+- Keep components small and focused
+- Use Zustand for global game state
+
+### CSS/Styling
+- Tailwind CSS for all styling
+- Use CSS variables for theming
+- Follow "Nordic Noir Casino" design theme
+- Dark mode by default
+
+### Game Engine
+- Engine is deterministic (seeded RNG)
+- Never expose hidden cards to players/bots
+- All game actions produce events
+- Bots receive only `PlayerObservation`, never `GameState`
+
+## Key Game Rules to Remember
+1. Rank order: 3 < 4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2
+2. After claiming 2, only 2/10/A are valid next claims
+3. Burns: 10, A, or 4 consecutive same rank
+4. True claim challenged → Challenger picks up pile, claimer continues
+5. Lie challenged → Liar picks up pile, turn advances
+
+## File Naming Conventions
+- Components: PascalCase (`GameTable.tsx`)
+- Hooks: camelCase with `use` prefix (`useGame.ts`)
+- Utils: camelCase (`rank-utils.ts`)
+- Types: camelCase (`game-state.ts`)
+- Tests: `*.test.ts` suffix
+
+## Testing Requirements
+- All rules must have tests
+- Use BDD Gherkin specs in `docs/features/`
+- Aim for >80% coverage on core logic
+- Test determinism with fixed seeds
+
+## Common Commands
+```bash
+pnpm install          # Install dependencies
+pnpm build            # Build all packages
+pnpm test             # Run all tests
+pnpm test:run         # Run tests once
+pnpm simulate         # Run CLI simulator
+pnpm dev              # Start web dev server (apps/web)
+```
+
+## Design Theme: "Nordic Noir Casino"
+- Dark backgrounds (#0a0a0f to #1a1f2e)
+- Gold accent (#d4af37)
+- Ice blue highlights (#7dd3fc)
+- Geist font family
+- Subtle animations, satisfying feedback
+
+## UI Component Guidelines
+- Cards: 80x112px, hover lift effect
+- Buttons: Clear states (default/hover/active/disabled)
+- Modals: Spring animation, backdrop blur
+- Always show game state clearly
+- Accessible: keyboard nav, ARIA labels
+
+## Performance Guidelines
+- Use GPU-accelerated animations (transform, opacity)
+- Batch state updates
+- Lazy load non-critical components
+- Preload sounds
+- Consider Web Workers for bot AI
+
+## Git Workflow
+- Conventional commits (feat:, fix:, docs:, etc.)
+- Branch naming: feature/*, fix/*, docs/*
+- PR required for main branch
+

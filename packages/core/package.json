@@ -1,0 +1,32 @@
+{
+  "name": "@valepaska/core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Valepaska game engine core",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:bdd": "vitest run --config vitest.bdd.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.1.1",
+    "vite": "^6.0.5",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.8",
+    "vitest-cucumber-plugin": "^0.6.0"
+  }
+}
+

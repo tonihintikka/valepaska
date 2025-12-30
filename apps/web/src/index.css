@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Geist font - loaded from local fallback or CDN */
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-mono/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: linear-gradient(145deg, #0a0a0f 0%, #0f1419 50%, #1a1f2e 100%);
+    background-attachment: fixed;
+    color: #f1f5f9;
+    overflow: hidden;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #0a0a0f;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #252b3b;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+}
+
+@layer components {
+  /* Card styling */
+  .card-base {
+    @apply relative w-20 h-28 rounded-lg shadow-card transition-all duration-200;
+    perspective: 1000px;
+  }
+  
+  .card-face {
+    @apply absolute inset-0 rounded-lg backface-hidden;
+    transform-style: preserve-3d;
+  }
+  
+  .card-front {
+    @apply bg-white border border-slate-200;
+  }
+  
+  .card-back {
+    @apply bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900;
+    background-image: 
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(255,255,255,0.05) 5px,
+        rgba(255,255,255,0.05) 10px
+      );
+    transform: rotateY(180deg);
+  }
+  
+  .card-selected {
+    @apply ring-2 ring-accent-gold shadow-glow-gold -translate-y-4;
+  }
+  
+  /* Button styling */
+  .btn {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-deep;
+  }
+  
+  .btn-primary {
+    @apply bg-accent-gold text-bg-deep hover:bg-amber-400;
+    @apply focus:ring-accent-gold;
+  }
+  
+  .btn-secondary {
+    @apply bg-bg-surface text-slate-200 border border-slate-700;
+    @apply hover:bg-bg-elevated hover:border-slate-600;
+    @apply focus:ring-slate-500;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-500;
+    @apply focus:ring-red-500;
+  }
+  
+  .btn-disabled {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
+  }
+  
+  /* Felt table texture */
+  .felt-texture {
+    background-color: #0f4a2c;
+    background-image: 
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  }
+  
+  /* Glass effect */
+  .glass {
+    @apply bg-bg-surface/80 backdrop-blur-sm border border-slate-700/50;
+  }
+  
+  /* Glow effects */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  }
+  
+  .glow-ice {
+    box-shadow: 0 0 20px rgba(125, 211, 252, 0.4);
+  }
+}
+
+@layer utilities {
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .text-shadow-gold {
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+  }
+}
+
