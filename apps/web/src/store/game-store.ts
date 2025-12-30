@@ -114,8 +114,8 @@ export const useGameStore = create<GameStore>()(
         }
       }
       
-      // Subscribe to events
-      engine.on('event', (event: GameEvent) => {
+      // Subscribe to all events
+      engine.onAll((event: GameEvent) => {
         get().handleEvent(event);
       });
       
