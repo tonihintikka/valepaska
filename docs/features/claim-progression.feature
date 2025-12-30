@@ -81,28 +81,34 @@ Feature: Claim Progression
       | A         | K        | rejected |
 
   @progression @special-rule
-  Scenario: After 2, only 2, 10, or A are valid
-    Given the last claim was rank "2"
+  Scenario: 2 can be claimed anytime (wildcard)
+    Given the last claim was rank "5"
     When player 2 plays cards claiming rank "2"
     Then the move should be accepted
 
   @progression @special-rule
-  Scenario: After 2, claiming 10 is valid
+  Scenario: After 2, only 2 is valid
     Given the last claim was rank "2"
-    When player 2 plays cards claiming rank "10"
+    When player 2 plays cards claiming rank "2"
     Then the move should be accepted
 
-  @progression @special-rule
-  Scenario: After 2, claiming A is valid
+  @progression @special-rule @validation
+  Scenario: After 2, claiming 10 is invalid
     Given the last claim was rank "2"
-    When player 2 plays cards claiming rank "A"
-    Then the move should be accepted
+    When player 2 tries to play cards claiming rank "10"
+    Then the move should be rejected with error "After 2, only 2 is a valid claim"
+
+  @progression @special-rule @validation
+  Scenario: After 2, claiming A is invalid
+    Given the last claim was rank "2"
+    When player 2 tries to play cards claiming rank "A"
+    Then the move should be rejected with error "After 2, only 2 is a valid claim"
 
   @progression @special-rule @validation
   Scenario Outline: After 2, other ranks are invalid
     Given the last claim was rank "2"
     When player 2 tries to play cards claiming rank "<rank>"
-    Then the move should be rejected with error "After 2, only 2, 10, or A are valid claims"
+    Then the move should be rejected with error "After 2, only 2 is a valid claim"
 
     Examples:
       | rank |

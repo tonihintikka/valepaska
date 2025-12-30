@@ -85,9 +85,10 @@ describe('Rank utilities', () => {
   });
 
   describe('getValidClaimRanks()', () => {
-    it('should return only number cards (3-10) when starting and deck has cards', () => {
+    it('should return number cards (3-10) and 2 when starting and deck has cards', () => {
       const valid = getValidClaimRanks(null); // default: deckHasCards = true
-      expect(valid).toEqual(['3', '4', '5', '6', '7', '8', '9', '10']);
+      // 2 is a wildcard - can be played anytime
+      expect(valid).toEqual(['3', '4', '5', '6', '7', '8', '9', '10', '2']);
     });
 
     it('should return all ranks when starting and deck is empty', () => {
@@ -130,16 +131,16 @@ describe('Rank utilities', () => {
     });
 
     describe('after 2 (special rule)', () => {
-      it('should allow 2 after 2', () => {
+      it('should allow only 2 after 2', () => {
         expect(isValidClaimRank('2', '2')).toBe(true);
       });
 
-      it('should allow 10 after 2', () => {
-        expect(isValidClaimRank('10', '2')).toBe(true);
+      it('should not allow 10 after 2', () => {
+        expect(isValidClaimRank('10', '2')).toBe(false);
       });
 
-      it('should allow A after 2', () => {
-        expect(isValidClaimRank('A', '2')).toBe(true);
+      it('should not allow A after 2', () => {
+        expect(isValidClaimRank('A', '2')).toBe(false);
       });
 
       it('should not allow other ranks after 2', () => {
@@ -151,13 +152,15 @@ describe('Rank utilities', () => {
     });
 
     describe('first claim', () => {
-      it('should allow only number cards (3-10) when deck has cards', () => {
+      it('should allow number cards (3-10) and 2 when deck has cards', () => {
         // Number cards allowed
         for (const rank of ['3', '4', '5', '6', '7', '8', '9', '10'] as const) {
           expect(isValidClaimRank(rank, null)).toBe(true);
         }
-        // Face cards not allowed when deck has cards
-        for (const rank of ['J', 'Q', 'K', 'A', '2'] as const) {
+        // 2 is a wildcard - always allowed
+        expect(isValidClaimRank('2', null)).toBe(true);
+        // Other face cards not allowed when deck has cards
+        for (const rank of ['J', 'Q', 'K', 'A'] as const) {
           expect(isValidClaimRank(rank, null)).toBe(false);
         }
       });

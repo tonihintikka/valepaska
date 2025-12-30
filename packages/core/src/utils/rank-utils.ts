@@ -54,9 +54,9 @@ export function getRanksGt(rank: Rank): Rank[] {
 
 /**
  * Special rule: valid ranks after 2
- * After claiming 2, only 2, 10, or A are valid
+ * After claiming 2, only 2 is valid (not 10 or A)
  */
-export const VALID_AFTER_TWO: readonly Rank[] = ['2', '10', 'A'] as const;
+export const VALID_AFTER_TWO: readonly Rank[] = ['2'] as const;
 
 /**
  * Number cards (3-10) - valid for starting claims when deck has cards
@@ -97,33 +97,37 @@ export function getValidClaimRanks(lastClaimRank: Rank | null, options: ClaimRan
     card => FACE_RANKS.includes(card.rank as Rank) || card.rank === 'A' || card.rank === '2'
   );
   
+  // Special rule: after 2, only 2 is valid
+  if (lastClaimRank === '2') {
+    return [...VALID_AFTER_TWO]; // Only ['2']
+  }
+  
   // No previous claim - starting a new round
   if (lastClaimRank === null) {
-    // If deck has cards, must start with number card (3-10)
-    // Exception: if hand has only face cards and deck is empty, allow face cards
+    // If deck has cards, must start with number card (3-10) OR 2 (wildcard)
     if (deckHasCards) {
-      return [...NUMBER_RANKS];
+      return [...NUMBER_RANKS, '2']; // 3-10 and 2
     } else if (hasOnlyFaceCards) {
       // Deck empty and only face cards - can start with any rank
       return [...RANKS];
     } else {
-      // Deck empty - prefer number cards but allow face cards if needed
+      // Deck empty - any rank allowed
       return [...RANKS];
     }
   }
 
-  // Special rule: after 2, only 2, 10, or A
-  if (lastClaimRank === '2') {
-    return [...VALID_AFTER_TWO];
-  }
-
   // Get ranks >= lastClaimRank
-  const validRanks = getRanksGte(lastClaimRank);
+  let validRanks = getRanksGte(lastClaimRank);
   
   // Face card restriction: J, Q, K only allowed after claim >= 7
   if (isRankLt(lastClaimRank, FACE_CARD_THRESHOLD)) {
     // Filter out J, Q, K (but keep 10, A, 2 which are special)
-    return validRanks.filter(r => !FACE_RANKS.includes(r));
+    validRanks = validRanks.filter(r => !FACE_RANKS.includes(r));
+  }
+  
+  // 2 is a wildcard - can be played anytime (if not already in validRanks)
+  if (!validRanks.includes('2')) {
+    validRanks = [...validRanks, '2'];
   }
 
   return validRanks;

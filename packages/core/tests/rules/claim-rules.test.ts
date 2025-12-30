@@ -28,24 +28,27 @@ describe('Claim Rules', () => {
     });
 
     it('should handle special 2 rule', () => {
-      // After 2, only 2, 10, A allowed
+      // After 2, only 2 allowed
       expect(validateClaimRank('2', '2').valid).toBe(true);
-      expect(validateClaimRank('10', '2').valid).toBe(true);
-      expect(validateClaimRank('A', '2').valid).toBe(true);
+      
+      // 10 and A not allowed after 2
+      expect(validateClaimRank('10', '2').valid).toBe(false);
+      expect(validateClaimRank('A', '2').valid).toBe(false);
       
       const invalid = validateClaimRank('7', '2');
       expect(invalid.valid).toBe(false);
-      expect(invalid.error).toContain('only 2, 10, or A');
+      expect(invalid.error).toContain('only 2');
     });
 
-    it('should accept only number cards when starting and deck has cards', () => {
+    it('should accept number cards and 2 when starting and deck has cards', () => {
       expect(validateClaimRank('3', null).valid).toBe(true);
       expect(validateClaimRank('7', null).valid).toBe(true);
       expect(validateClaimRank('10', null).valid).toBe(true);
-      // Face cards not allowed when starting with deck
+      // 2 is a wildcard - always allowed
+      expect(validateClaimRank('2', null).valid).toBe(true);
+      // Other face cards not allowed when starting with deck
       expect(validateClaimRank('K', null).valid).toBe(false);
       expect(validateClaimRank('A', null).valid).toBe(false);
-      expect(validateClaimRank('2', null).valid).toBe(false);
     });
 
     it('should accept any rank when starting and deck is empty', () => {

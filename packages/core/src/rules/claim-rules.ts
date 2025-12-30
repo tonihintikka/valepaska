@@ -24,7 +24,7 @@ export function validateClaimRank(
     if (lastClaimRank === '2') {
       return {
         valid: false,
-        error: 'After 2, only 2, 10, or A are valid claims',
+        error: 'After 2, only 2 is a valid claim',
       };
     }
     

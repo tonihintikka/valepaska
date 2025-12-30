@@ -54,8 +54,9 @@ Valepaska ("Bullshit" in Finnish) is a bluffing card game for 3-6 players. Playe
 - **J, Q, K** can only be claimed after `lastClaimRank >= 7`
 - **10, A, 2** are special ranks and can always be claimed (when rank progression allows)
 
-### Special Rule: After 2
-- If `lastClaimRank == 2`, next `claimRank` can ONLY be: **2, 10, or A**
+### Special Rule: 2 is a Wildcard
+- **2 can be claimed anytime** (regardless of lastClaimRank)
+- **After 2, only 2 is valid** - once someone claims 2, only 2 can be claimed next
 
 ---
 
@@ -110,9 +111,10 @@ Burns trigger only if the claim is **accepted** (no challenge, or challenged and
 | Rule | Description |
 |------|-------------|
 | Rank order | 3 < 4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2 |
-| Starting claim | Number card (3-10) while deck has cards |
+| Starting claim | Number card (3-10) or 2 while deck has cards |
 | Face cards (J,Q,K) | Only after reaching 7 or higher |
-| After 2 | Only 2, 10, or A allowed |
+| 2 wildcard | Can be claimed anytime |
+| After 2 | Only 2 allowed |
 | 10 burns | Table clears on accepted 10 |
 | A burns | Table clears on accepted A |
 | 4-in-row burns | Table clears on 4 same consecutive claims |

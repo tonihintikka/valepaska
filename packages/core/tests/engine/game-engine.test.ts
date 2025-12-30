@@ -79,9 +79,9 @@ describe('GameEngine', () => {
       const engine = GameEngine.create(players, {}, 12345);
       const obs = engine.getObservation('p1');
 
-      // First claim must be number card (3-10) when deck has cards
-      expect(obs.validClaimRanks).toHaveLength(8); // 3,4,5,6,7,8,9,10
-      expect(obs.validClaimRanks).toEqual(['3', '4', '5', '6', '7', '8', '9', '10']);
+      // First claim must be number card (3-10) or 2 (wildcard) when deck has cards
+      expect(obs.validClaimRanks).toHaveLength(9); // 3,4,5,6,7,8,9,10,2
+      expect(obs.validClaimRanks).toEqual(['3', '4', '5', '6', '7', '8', '9', '10', '2']);
     });
   });
 
