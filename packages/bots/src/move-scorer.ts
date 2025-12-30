@@ -37,6 +37,23 @@ export function scoreMove(
     score += (3 - consecutiveCount) * 1.5; // Closer to 4 = more valuable
   }
 
+  // 2-card strategy: save 2s for endgame
+  if (move.claimRank === '2') {
+    if (observation.isEndgame) {
+      // In endgame, 2 is VERY valuable - wildcard to empty hand
+      score += 8;
+    } else {
+      // Before endgame, SAVE your 2s - penalize playing them
+      // Only play if it's honest and we have multiple 2s
+      const twosInHand = observation.hand.filter(c => c.rank === '2').length;
+      if (move.isHonest && twosInHand >= 2) {
+        score -= 2; // Small penalty, okay to play one if we have spares
+      } else {
+        score -= 5; // Big penalty - save your 2s!
+      }
+    }
+  }
+
   // Endgame adjustments
   if (observation.isEndgame) {
     // Much higher value on getting cards out
@@ -47,11 +64,6 @@ export function scoreMove(
     if (remainingCards > 0) {
       score -= remainingCards * config.endgameAggro;
     }
-  }
-
-  // 2 lock strategy: if we claim 2, opponent is limited
-  if (move.claimRank === '2' && !observation.isEndgame) {
-    score += 1.5; // Lock benefit
   }
 
   return score;

@@ -40,6 +40,18 @@ export function calculateSuspicionScore(
     score += 2.0;
   }
 
+  // 2-claim suspicion: 2 is valuable, people often bluff it
+  if (claimRank === '2') {
+    // Check if we're in a 2-lock (last claim was 2)
+    const lastClaim = observation.claimHistory[observation.claimHistory.length - 1];
+    if (lastClaim?.rank === '2') {
+      // In 2-lock, 2 claims are MORE suspicious (people want out)
+      score += 1.5;
+    }
+    // 2 is valuable card, slight suspicion on any 2 claim
+    score += 0.5;
+  }
+
   // High count claims are suspicious
   if (claimCount >= 3) {
     score += 0.6;
