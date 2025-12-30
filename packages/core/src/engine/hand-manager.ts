@@ -58,7 +58,7 @@ export function replenishAllHands(
     // Convert readonly Map to mutable Map
     const mutableHands = new Map<PlayerId, Card[]>();
     for (const [playerId, cards] of state.hands) {
-      mutableHands.set(playerId, [...cards]);
+      mutableHands.set(playerId, [...cards] as Card[]);
     }
     return {
       hands: mutableHands,

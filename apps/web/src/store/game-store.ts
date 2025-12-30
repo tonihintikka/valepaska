@@ -14,100 +14,49 @@ import {
   createBotPlayer,
 } from '@valepaska/core';
 import { RuleBot } from '@valepaska/bots';
-import type { UIPhase, PlayerConfig, GameConfig, BotDifficulty } from '../types';
+import type { UIPhase, PlayerConfig, GameConfig } from '../types';
+import { createGameStateSlice, type GameStateSlice } from './slices/game-state-slice.js';
+import { createPlayerSlice, type PlayerSlice } from './slices/player-slice.js';
+import { createUISlice, type UISlice } from './slices/ui-slice.js';
+import { createEventSlice, type EventSlice } from './slices/event-slice.js';
+import { createBotSlice, type BotSlice } from './slices/bot-slice.js';
+import { createDebugSlice, type DebugSlice } from './slices/debug-slice.js';
 
-interface GameStore {
-  // Core state
-  uiPhase: UIPhase;
-  engine: GameEngine | null;
-  humanPlayerId: PlayerId | null;
-  playerConfigs: PlayerConfig[];
-  observation: PlayerObservation | null;
-  gameState: GameState | null; // Full state for spectator mode
-  events: GameEvent[];
-  winnerId: PlayerId | null;
-  
-  // UI state
-  selectedCards: string[];
-  selectedRank: Rank | null;
-  showChallengeModal: boolean;
-  challengeTimeLeft: number;
-  isProcessingBots: boolean;
-  showVictoryOverlay: boolean;
-  pendingWinnerId: PlayerId | null;
-  activeChallenge: { challengerId: PlayerId; accusedId: PlayerId } | null;
-  challengeReveal: {
-    revealedCards: readonly Card[];
-    wasLie: boolean;
-    claimedRank: Rank;
-    claimedCount: number;
-    challengerId: PlayerId;
-    accusedId: PlayerId;
-    receiverId: PlayerId; // Who receives the pile (loser)
-  } | null;
-  
-  // Debug/Spectator
-  debugMode: boolean;
-  isSpectator: boolean;
-  gameSpeed: number; // Multiplier: 0.5 = slow, 1 = normal, 2 = fast, 4 = very fast
-  
-  // Bot instances
-  bots: Map<PlayerId, RuleBot>;
-  
-  // Actions
+// Combined store interface
+export interface GameStore extends 
+  GameStateSlice,
+  PlayerSlice,
+  UISlice,
+  EventSlice,
+  BotSlice,
+  DebugSlice {
+  // Game actions
   startGame: (config: GameConfig) => void;
   resetGame: () => void;
   
   // Human actions
-  selectCard: (cardId: string) => void;
-  deselectCard: (cardId: string) => void;
-  clearSelection: () => void;
-  setSelectedRank: (rank: Rank | null) => void;
   playCards: () => void;
   challenge: () => void;
   pass: () => void;
-  
-  // Spectator controls
-  setGameSpeed: (speed: number) => void;
   
   // Internal
   updateObservation: () => void;
   processBotTurn: () => void;
   processBotChallenges: () => void;
   handleEvent: (event: GameEvent) => void;
-  dismissVictoryOverlay: () => void;
-  dismissChallenge: () => void;
-  dismissChallengeReveal: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
   subscribeWithSelector((set, get) => ({
-    // Initial state
-    uiPhase: 'start',
-    engine: null,
-    humanPlayerId: null,
-    playerConfigs: [],
-    observation: null,
-    gameState: null,
-    events: [],
-    winnerId: null,
+    // Combine all slices
+    ...createGameStateSlice(set, get),
+    ...createPlayerSlice(set, get),
+    ...createUISlice(set, get),
+    ...createEventSlice(set, get),
+    ...createBotSlice(set, get),
+    ...createDebugSlice(set, get),
     
-    selectedCards: [],
-    selectedRank: null,
-    showChallengeModal: false,
-    challengeTimeLeft: 0,
-    isProcessingBots: false,
-    showVictoryOverlay: false,
-    pendingWinnerId: null,
-    activeChallenge: null,
-    challengeReveal: null,
-    
-    debugMode: false,
-    isSpectator: false,
-    gameSpeed: 1,
-    
-    bots: new Map(),
-    
+    // Game actions
     startGame: (config: GameConfig) => {
       // Create player objects for the engine
       const players: Player[] = config.players.map(p => {
@@ -192,26 +141,6 @@ export const useGameStore = create<GameStore>()(
         isSpectator: false,
         gameSpeed: 1,
       });
-    },
-    
-    selectCard: (cardId: string) => {
-      const { selectedCards } = get();
-      if (selectedCards.length < 4 && !selectedCards.includes(cardId)) {
-        set({ selectedCards: [...selectedCards, cardId] });
-      }
-    },
-    
-    deselectCard: (cardId: string) => {
-      const { selectedCards } = get();
-      set({ selectedCards: selectedCards.filter(id => id !== cardId) });
-    },
-    
-    clearSelection: () => {
-      set({ selectedCards: [], selectedRank: null });
-    },
-    
-    setSelectedRank: (rank: Rank | null) => {
-      set({ selectedRank: rank });
     },
     
     playCards: () => {
@@ -315,10 +244,6 @@ export const useGameStore = create<GameStore>()(
       
       const { gameSpeed } = get();
       setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
-    },
-    
-    setGameSpeed: (speed: number) => {
-      set({ gameSpeed: speed });
     },
     
     updateObservation: () => {
@@ -459,14 +384,15 @@ export const useGameStore = create<GameStore>()(
     },
     
     handleEvent: (event: GameEvent) => {
-      const { events, isSpectator } = get();
-      set({ events: [...events, event] });
+      const { isSpectator } = get();
+      get().addEvent(event);
       
       if (event.type === 'PLAYER_WON') {
         // Show victory overlay first, then transition to game over
+        get().setShowVictoryOverlay(true);
+        get().setPendingWinnerId(event.winnerId);
+        get().setWinnerId(event.winnerId);
         set({ 
-          showVictoryOverlay: true,
-          pendingWinnerId: event.winnerId,
           showChallengeModal: false,
           activeChallenge: null,
           challengeReveal: null,
@@ -515,23 +441,15 @@ export const useGameStore = create<GameStore>()(
       get().updateObservation();
     },
     
+    // Override dismissVictoryOverlay to also set uiPhase
     dismissVictoryOverlay: () => {
-      const { pendingWinnerId } = get();
-      set({ 
-        showVictoryOverlay: false,
-        uiPhase: 'gameOver',
-        winnerId: pendingWinnerId,
-        pendingWinnerId: null,
+      get().dismissVictoryOverlay(() => {
+        const { pendingWinnerId } = get();
+        set({
+          uiPhase: 'gameOver',
+          winnerId: pendingWinnerId,
+        });
       });
-    },
-    
-    dismissChallenge: () => {
-      set({ activeChallenge: null });
-    },
-    
-    dismissChallengeReveal: () => {
-      set({ challengeReveal: null });
     },
   }))
 );
-

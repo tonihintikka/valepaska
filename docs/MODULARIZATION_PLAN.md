@@ -61,26 +61,27 @@ packages/core/src/engine/
 
 ---
 
-## Priority 2: `game-store.ts` (537 lines)
+## Priority 2: `game-store.ts` ✅ COMPLETED (2025-01-27)
 
-**Current state:** Single Zustand store with all game state and actions.
+**Previous state:** Single Zustand store with all game state and actions (537 lines).
 
-### Proposed Split
+**Current state:** Modularized into 6 Zustand slices (455 lines main file).
+
+### Implementation Result
 
 ```
 apps/web/src/store/
-├── game-store.ts           (~100 lines) - Main store, combines slices
-├── slices/
-│   ├── game-state-slice.ts (~80 lines)  - Core game state (observation, phase)
-│   ├── player-slice.ts     (~80 lines)  - Player configs, selection
-│   ├── ui-slice.ts         (~100 lines) - UI state (modals, overlays)
-│   ├── event-slice.ts      (~80 lines)  - Event handling, event log
-│   └── bot-slice.ts        (~100 lines) - Bot runner, speed control
-├── actions/
-│   ├── game-actions.ts     (~50 lines)  - startGame, resetGame
-│   └── challenge-actions.ts (~50 lines) - handleChallenge, dismissChallenge
-└── index.ts
+├── game-store.ts           (455 lines) - Main store, combines slices ✅
+└── slices/
+    ├── game-state-slice.ts (41 lines)  - Core game state ✅
+    ├── player-slice.ts     (27 lines)  - Player configs ✅
+    ├── ui-slice.ts         (103 lines) - UI state, modals, overlays ✅
+    ├── event-slice.ts      (29 lines)  - Event handling ✅
+    ├── bot-slice.ts        (28 lines)  - Bot instances, speed control ✅
+    └── debug-slice.ts      (26 lines)  - Debug/spectator mode ✅
 ```
+
+**Result:** Reduced from 537 to 455 lines (-82 lines, -15% reduction)
 
 ### Slice Pattern
 
@@ -102,12 +103,25 @@ export const createUISlice: StateCreator<GameStore, [], [], UISlice> = (set) => 
 });
 ```
 
-### Migration Strategy
+### Implementation Notes
 
-1. Identify logical groupings of state and actions
-2. Create slice files with `StateCreator` pattern
-3. Combine slices in main store using `create()`
-4. Ensure type safety with proper slice composition
+**Approach Used:**
+1. ✅ Identified logical groupings of state and actions
+2. ✅ Created slice files with `StateCreator` pattern
+3. ✅ Combined slices in main store using spread operator
+4. ✅ Maintained type safety with proper slice composition via interface extension
+
+**Key Design Decisions:**
+- Used Zustand's `StateCreator` pattern for clean slice composition
+- Maintained backward compatibility: public API unchanged
+- Game actions (startGame, playCards, etc.) kept in main store for complex logic
+- Slice actions are simple setters, complex logic remains in main store
+
+**Lessons Learned:**
+- Zustand slices work well for organizing large stores
+- Interface extension (`GameStore extends GameStateSlice, PlayerSlice, ...`) provides clean type composition
+- Complex actions that need multiple slices can stay in main store
+- Simple state updates work well in slices
 
 ---
 
@@ -155,10 +169,10 @@ apps/web/src/components/GameTable/
 
 ## Implementation Order
 
-1. **Phase 1: game-store.ts** (High impact, medium effort)
+1. **Phase 1: game-store.ts** ✅ COMPLETED (2025-01-27)
    - Zustand slices are well-established pattern
    - Improves developer experience immediately
-   - Low risk of breaking changes
+   - ✅ Successfully completed with all tests passing
 
 2. **Phase 2: StartScreen.tsx** (Medium impact, low effort)
    - UI components are easy to extract

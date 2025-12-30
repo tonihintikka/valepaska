@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Refactored
 
+#### `game-store.ts` Modularization (2025-01-27)
+
+**Breaking Change:** Internal refactoring - public API unchanged, but Zustand store structure significantly improved.
+
+Split the monolithic `game-store.ts` (537 lines) into focused Zustand slices:
+
+- **`game-state-slice.ts`** (41 lines): Core game state management
+  - `uiPhase`, `engine`, `observation`, `gameState`, `winnerId`
+  - State setters for engine lifecycle
+
+- **`player-slice.ts`** (27 lines): Player configuration
+  - `humanPlayerId`, `playerConfigs`
+  - Player management actions
+
+- **`ui-slice.ts`** (103 lines): UI state and modals
+  - Card selection (`selectedCards`, `selectedRank`)
+  - Challenge modal state
+  - Overlays (victory, challenge reveal, active challenge)
+  - Processing state (`isProcessingBots`)
+
+- **`event-slice.ts`** (29 lines): Event handling
+  - `events` array
+  - `addEvent()`, `clearEvents()`
+
+- **`bot-slice.ts`** (28 lines): Bot instances and speed control
+  - `bots` Map
+  - `gameSpeed` multiplier
+  - Bot management actions
+
+- **`debug-slice.ts`** (26 lines): Debug and spectator mode
+  - `debugMode`, `isSpectator`
+  - Debug controls
+
+**Result:**
+- `game-store.ts`: Reduced from 537 to 455 lines (-82 lines, -15%)
+- Better separation of concerns using Zustand slice pattern
+- Easier to maintain and test individual slices
+- Improved type safety with slice composition
+
+**Migration Notes:**
+- Public API (`useGameStore` hook) remains unchanged
+- All existing components continue to work without modifications
+- Internal structure changed, but behavior is identical
+- All 166 tests passing
+
+**Files Changed:**
+- `apps/web/src/store/game-store.ts` (refactored)
+- `apps/web/src/store/slices/game-state-slice.ts` (new)
+- `apps/web/src/store/slices/player-slice.ts` (new)
+- `apps/web/src/store/slices/ui-slice.ts` (new)
+- `apps/web/src/store/slices/event-slice.ts` (new)
+- `apps/web/src/store/slices/bot-slice.ts` (new)
+- `apps/web/src/store/slices/debug-slice.ts` (new)
+
+---
+
 #### `game-engine.ts` Modularization (2025-01-27)
 
 **Breaking Change:** Internal refactoring - public API unchanged, but internal structure significantly improved.
