@@ -6,6 +6,7 @@ import { EventLog } from '../components/EventLog';
 import { DebugPanel } from '../components/DebugPanel';
 import { VictoryOverlay } from '../components/VictoryOverlay';
 import { ChallengeIndicator } from '../components/ChallengeIndicator';
+import { ChallengeRevealOverlay } from '../components/ChallengeRevealOverlay';
 import { useGameStore } from '../store/game-store';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
@@ -19,6 +20,8 @@ export function GameScreen() {
   const dismissVictoryOverlay = useGameStore((state) => state.dismissVictoryOverlay);
   const activeChallenge = useGameStore((state) => state.activeChallenge);
   const dismissChallenge = useGameStore((state) => state.dismissChallenge);
+  const challengeReveal = useGameStore((state) => state.challengeReveal);
+  const dismissChallengeReveal = useGameStore((state) => state.dismissChallengeReveal);
 
   // Get player position by ID (for challenge indicator)
   const getPlayerPosition = (playerId: string): PlayerPosition => {
@@ -82,6 +85,27 @@ export function GameScreen() {
             challengerPosition={getPlayerPosition(activeChallenge.challengerId)}
             accusedName={accused.name}
             onComplete={dismissChallenge}
+          />
+        );
+      })()}
+
+      {/* Challenge reveal overlay - shows flipped cards after challenge */}
+      {challengeReveal && (() => {
+        const challenger = playerConfigs.find((p) => p.id === challengeReveal.challengerId);
+        const accused = playerConfigs.find((p) => p.id === challengeReveal.accusedId);
+        const receiver = playerConfigs.find((p) => p.id === challengeReveal.receiverId);
+        if (!challenger || !accused || !receiver) return null;
+
+        return (
+          <ChallengeRevealOverlay
+            revealedCards={challengeReveal.revealedCards}
+            wasLie={challengeReveal.wasLie}
+            claimedRank={challengeReveal.claimedRank}
+            claimedCount={challengeReveal.claimedCount}
+            challengerName={challenger.name}
+            accusedName={accused.name}
+            receiverName={receiver.name}
+            onComplete={dismissChallengeReveal}
           />
         );
       })()}

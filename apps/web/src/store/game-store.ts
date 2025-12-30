@@ -8,6 +8,7 @@ import {
   type PlayerObservation,
   type Player,
   type GameState,
+  type Card,
   createPlayMove,
   createHumanPlayer,
   createBotPlayer,
@@ -35,6 +36,15 @@ interface GameStore {
   showVictoryOverlay: boolean;
   pendingWinnerId: PlayerId | null;
   activeChallenge: { challengerId: PlayerId; accusedId: PlayerId } | null;
+  challengeReveal: {
+    revealedCards: readonly Card[];
+    wasLie: boolean;
+    claimedRank: Rank;
+    claimedCount: number;
+    challengerId: PlayerId;
+    accusedId: PlayerId;
+    receiverId: PlayerId; // Who receives the pile (loser)
+  } | null;
   
   // Debug/Spectator
   debugMode: boolean;
@@ -63,6 +73,7 @@ interface GameStore {
   handleEvent: (event: GameEvent) => void;
   dismissVictoryOverlay: () => void;
   dismissChallenge: () => void;
+  dismissChallengeReveal: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -85,6 +96,7 @@ export const useGameStore = create<GameStore>()(
     showVictoryOverlay: false,
     pendingWinnerId: null,
     activeChallenge: null,
+    challengeReveal: null,
     
     debugMode: false,
     isSpectator: false,
@@ -169,6 +181,7 @@ export const useGameStore = create<GameStore>()(
         showVictoryOverlay: false,
         pendingWinnerId: null,
         activeChallenge: null,
+        challengeReveal: null,
         debugMode: false,
         isSpectator: false,
       });
@@ -438,6 +451,7 @@ export const useGameStore = create<GameStore>()(
           pendingWinnerId: event.winnerId,
           showChallengeModal: false,
           activeChallenge: null,
+          challengeReveal: null,
         });
       }
       
@@ -456,9 +470,28 @@ export const useGameStore = create<GameStore>()(
         }, 2000);
       }
       
-      // Clear challenge indicator when challenge is resolved
+      // Show challenge reveal overlay when challenge is resolved
       if (event.type === 'CHALLENGE_RESOLVED') {
-        set({ activeChallenge: null });
+        // Determine who receives the pile (the loser)
+        const receiverId = event.wasLie ? event.accusedId : event.challengerId;
+        
+        set({ 
+          activeChallenge: null,
+          challengeReveal: {
+            revealedCards: event.revealedCards,
+            wasLie: event.wasLie,
+            claimedRank: event.claimedRank,
+            claimedCount: event.claimedCount,
+            challengerId: event.challengerId,
+            accusedId: event.accusedId,
+            receiverId,
+          },
+        });
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+          get().dismissChallengeReveal();
+        }, 3000);
       }
       
       get().updateObservation();
@@ -476,6 +509,10 @@ export const useGameStore = create<GameStore>()(
     
     dismissChallenge: () => {
       set({ activeChallenge: null });
+    },
+    
+    dismissChallengeReveal: () => {
+      set({ challengeReveal: null });
     },
   }))
 );
