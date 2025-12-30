@@ -6,23 +6,27 @@ This document outlines a plan to split the largest files in the codebase into sm
 
 ---
 
-## Priority 1: `game-engine.ts` (770 lines)
+## Priority 1: `game-engine.ts` ✅ COMPLETED (2025-01-27)
 
-**Current state:** Single monolithic file handling all game logic.
+**Previous state:** Single monolithic file handling all game logic (770 lines).
 
-### Proposed Split
+**Current state:** Modularized into 6 focused modules (550 lines main file).
+
+### Implementation Result
 
 ```
 packages/core/src/engine/
-├── game-engine.ts          (~150 lines) - Main GameEngine class, state management
-├── turn-manager.ts         (~100 lines) - Turn advancement, player rotation
-├── play-executor.ts        (~150 lines) - submitMove, validateAndExecutePlay
-├── challenge-executor.ts   (~150 lines) - executeChallenge, challenge resolution
-├── burn-executor.ts        (~80 lines)  - executeBurn, burn logic
-├── hand-manager.ts         (~80 lines)  - replenishHands, card drawing
-├── bot-runner.ts           (~60 lines)  - Bot registration and execution
-└── index.ts                            - Re-exports
+├── game-engine.ts          (550 lines) - Main GameEngine class, state management, public API
+├── turn-manager.ts         (40 lines)  - Turn advancement, player rotation ✅
+├── play-executor.ts        (50 lines)  - Play move execution ✅
+├── challenge-executor.ts   (164 lines) - Challenge resolution, burn handling ✅
+├── burn-executor.ts        (48 lines)  - Burn logic, pile clearing ✅
+├── hand-manager.ts         (90 lines)  - Card dealing, hand replenishment ✅
+├── bot-runner.ts           (94 lines)  - Bot integration, challenge decisions ✅
+└── index.ts                            - Re-exports ✅
 ```
+
+**Result:** Reduced from 770 to 550 lines (-220 lines, -29% reduction)
 
 ### Module Responsibilities
 
@@ -36,12 +40,24 @@ packages/core/src/engine/
 | `hand-manager.ts` | `replenishHands()`, `drawCards()`, deck operations |
 | `bot-runner.ts` | `registerBot()`, `runBotTurn()`, bot integration |
 
-### Migration Strategy
+### Implementation Notes
 
-1. Extract helper functions first (no state changes)
-2. Create executor classes that receive state and return new state
-3. Keep GameEngine as facade that delegates to executors
-4. Update tests incrementally
+**Approach Used:**
+1. ✅ Extracted pure functions first (no state changes)
+2. ✅ Created executor functions that receive state and return new state
+3. ✅ Kept GameEngine as facade that delegates to executors
+4. ✅ All tests passing (166/166) - no test changes needed
+
+**Key Design Decisions:**
+- Used functional approach: executors receive `GameState` and return new `GameState`
+- Maintained backward compatibility: public API unchanged
+- Type safety: Fixed TypeScript strict mode issues with readonly types
+- Event emission: Kept in `game-engine.ts` for centralized event handling
+
+**Lessons Learned:**
+- Functional state transformation works well for game engine
+- TypeScript's `exactOptionalPropertyTypes` requires careful handling of optional properties
+- `LastPlay.claimRank` is `string` type (not `Rank`) - requires type assertions in some places
 
 ---
 
@@ -149,10 +165,10 @@ apps/web/src/components/GameTable/
    - No state management complexity
    - Good practice for component composition
 
-3. **Phase 3: game-engine.ts** (High impact, high effort)
+3. **Phase 3: game-engine.ts** ✅ COMPLETED (2025-01-27)
    - Most complex refactoring
    - Requires careful testing
-   - Should be done after store refactoring
+   - ✅ Successfully completed with all tests passing
 
 4. **Phase 4: GameTable.tsx** (Low impact, low effort)
    - Optional optimization

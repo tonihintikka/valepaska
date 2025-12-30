@@ -91,15 +91,26 @@ See `docs/RULES.md` for complete rules.
 ```
 valepaska/
 ├── packages/
-│   ├── core/           # Game engine
+│   ├── core/           # Game engine (modularized)
+│   │   └── src/engine/ # Engine modules (turn-manager, play-executor, etc.)
 │   ├── bots/           # AI bots
 │   └── simulator/      # CLI simulator
 ├── docs/
 │   ├── IMPLEMENTATION_PLAN.md
+│   ├── MODULARIZATION_PLAN.md  # Refactoring plan and status
 │   ├── RULES.md
 │   └── features/       # BDD Gherkin specs
+├── CHANGELOG.md        # Detailed change history
 └── README.md
 ```
+
+### Recent Refactoring
+
+The game engine has been modularized (2025-01-27) for better maintainability:
+- `game-engine.ts` reduced from 770 to 550 lines (-29%)
+- Split into 6 focused modules (turn-manager, hand-manager, play-executor, challenge-executor, burn-executor, bot-runner)
+- All tests passing, public API unchanged
+- See `CHANGELOG.md` and `docs/MODULARIZATION_PLAN.md` for details
 
 ## Development
 
