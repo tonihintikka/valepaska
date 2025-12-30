@@ -1,13 +1,16 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
-import { OpponentHand } from './OpponentHand';
 import { PileCard } from './Card';
+import { MiniCard } from './MiniCard';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
+import type { Card } from '@valepaska/core';
 
 export function GameTable() {
   const observation = useGameStore((state) => state.observation);
+  const gameState = useGameStore((state) => state.gameState);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const humanPlayerId = useGameStore((state) => state.humanPlayerId);
+  const isSpectator = useGameStore((state) => state.isSpectator);
 
   if (!observation) return null;
 
@@ -89,6 +92,11 @@ export function GameTable() {
 
         const isCurrentPlayer = observation.currentPlayerId === opponent.id;
 
+        // Get actual cards in spectator mode
+        const cards = isSpectator && gameState
+          ? gameState.hands.get(opponent.id) ?? []
+          : undefined;
+
         return (
           <OpponentSlot
             key={opponent.id}
@@ -98,6 +106,7 @@ export function GameTable() {
             handSize={handSize}
             isCurrentPlayer={isCurrentPlayer}
             difficulty={opponent.botDifficulty}
+            cards={cards}
           />
         );
       })}
@@ -123,9 +132,10 @@ interface OpponentSlotProps {
   handSize: number;
   isCurrentPlayer: boolean;
   difficulty?: string;
+  cards?: readonly Card[]; // Actual cards (spectator mode only)
 }
 
-function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, difficulty }: OpponentSlotProps) {
+function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, difficulty, cards }: OpponentSlotProps) {
   const positionClasses: Record<PlayerPosition, string> = {
     bottom: 'bottom-4 left-1/2 -translate-x-1/2',
     top: 'top-4 left-1/2 -translate-x-1/2',
@@ -165,15 +175,25 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
         </div>
 
         {/* Hand representation */}
-        <div className={`flex justify-center -space-x-4 ${cardRotation[position]}`}>
-          {Array.from({ length: Math.min(handSize, 5) }).map((_, i) => (
-            <div
-              key={i}
-              className="w-8 h-12 rounded bg-gradient-to-br from-blue-800 to-blue-900 border border-blue-700/50 shadow-sm"
-              style={{ transform: `rotate(${(i - 2) * 5}deg)` }}
-            />
-          ))}
-        </div>
+        {cards ? (
+          // Spectator mode: show actual cards
+          <div className={`flex justify-center flex-wrap gap-1 max-w-[200px] ${cardRotation[position]}`}>
+            {cards.map((card) => (
+              <MiniCard key={card.id} card={card} />
+            ))}
+          </div>
+        ) : (
+          // Normal mode: show card backs
+          <div className={`flex justify-center -space-x-4 ${cardRotation[position]}`}>
+            {Array.from({ length: Math.min(handSize, 5) }).map((_, i) => (
+              <div
+                key={i}
+                className="w-8 h-12 rounded bg-gradient-to-br from-blue-800 to-blue-900 border border-blue-700/50 shadow-sm"
+                style={{ transform: `rotate(${(i - 2) * 5}deg)` }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Card count */}
         <div className="text-center mt-2">

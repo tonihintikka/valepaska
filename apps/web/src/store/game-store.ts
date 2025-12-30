@@ -7,6 +7,7 @@ import {
   type GameEvent, 
   type PlayerObservation,
   type Player,
+  type GameState,
   createPlayMove,
   createHumanPlayer,
   createBotPlayer,
@@ -21,6 +22,7 @@ interface GameStore {
   humanPlayerId: PlayerId | null;
   playerConfigs: PlayerConfig[];
   observation: PlayerObservation | null;
+  gameState: GameState | null; // Full state for spectator mode
   events: GameEvent[];
   winnerId: PlayerId | null;
   
@@ -66,6 +68,7 @@ export const useGameStore = create<GameStore>()(
     humanPlayerId: null,
     playerConfigs: [],
     observation: null,
+    gameState: null,
     events: [],
     winnerId: null,
     
@@ -147,6 +150,7 @@ export const useGameStore = create<GameStore>()(
         humanPlayerId: null,
         playerConfigs: [],
         observation: null,
+        gameState: null,
         events: [],
         winnerId: null,
         bots: new Map(),
@@ -282,6 +286,12 @@ export const useGameStore = create<GameStore>()(
     updateObservation: () => {
       const { engine, humanPlayerId, playerConfigs, isSpectator } = get();
       if (!engine) return;
+      
+      // Store full game state for spectator mode
+      if (isSpectator) {
+        const gameState = engine.getState();
+        set({ gameState });
+      }
       
       // In spectator mode, observe from current player's perspective
       const observeId = isSpectator 
