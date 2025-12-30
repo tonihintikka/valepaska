@@ -8,8 +8,8 @@ import {
 import type { ClaimRecord } from '../../src/types/claim.js';
 
 describe('Burn Rules', () => {
-  const createClaimRecord = (rank: string, accepted = true): ClaimRecord => ({
-    playerId: 'player1',
+  const createClaimRecord = (rank: string, accepted = true, playerId = 'player1'): ClaimRecord => ({
+    playerId,
     rank: rank as ClaimRecord['rank'],
     count: 1,
     timestamp: Date.now(),
@@ -89,6 +89,16 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
       ];
+      expect(checkFourInRow(history, '7')).toBe(true);
+    });
+
+    it('should trigger four-in-row even from different players', () => {
+      const history = [
+        createClaimRecord('7', true, 'player1'),
+        createClaimRecord('7', true, 'player2'),
+        createClaimRecord('7', true, 'player3'),
+      ];
+      // player4 claims 7 - should trigger burn
       expect(checkFourInRow(history, '7')).toBe(true);
     });
   });
