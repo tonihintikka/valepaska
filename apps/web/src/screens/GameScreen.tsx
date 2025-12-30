@@ -5,7 +5,9 @@ import { ChallengeModal } from '../components/ChallengeModal';
 import { EventLog } from '../components/EventLog';
 import { DebugPanel } from '../components/DebugPanel';
 import { VictoryOverlay } from '../components/VictoryOverlay';
+import { ChallengeIndicator } from '../components/ChallengeIndicator';
 import { useGameStore } from '../store/game-store';
+import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
 export function GameScreen() {
   const showChallengeModal = useGameStore((state) => state.showChallengeModal);
@@ -15,6 +17,16 @@ export function GameScreen() {
   const pendingWinnerId = useGameStore((state) => state.pendingWinnerId);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const dismissVictoryOverlay = useGameStore((state) => state.dismissVictoryOverlay);
+  const activeChallenge = useGameStore((state) => state.activeChallenge);
+  const dismissChallenge = useGameStore((state) => state.dismissChallenge);
+
+  // Get player position by ID (for challenge indicator)
+  const getPlayerPosition = (playerId: string): PlayerPosition => {
+    const playerCount = playerConfigs.length;
+    const positions = PLAYER_POSITIONS[playerCount] ?? PLAYER_POSITIONS[4]!;
+    const playerIndex = playerConfigs.findIndex((p) => p.id === playerId);
+    return positions[playerIndex] ?? 'top';
+  };
 
   return (
     <div className="h-full w-full flex flex-col bg-bg-deep overflow-hidden">
@@ -56,6 +68,23 @@ export function GameScreen() {
 
       {/* Challenge modal */}
       {showChallengeModal && !isSpectator && <ChallengeModal />}
+
+      {/* Challenge indicator (spectator mode) */}
+      {activeChallenge && isSpectator && (() => {
+        const challenger = playerConfigs.find((p) => p.id === activeChallenge.challengerId);
+        const accused = playerConfigs.find((p) => p.id === activeChallenge.accusedId);
+        if (!challenger || !accused) return null;
+
+        return (
+          <ChallengeIndicator
+            challengerId={activeChallenge.challengerId}
+            challengerName={challenger.name}
+            challengerPosition={getPlayerPosition(activeChallenge.challengerId)}
+            accusedName={accused.name}
+            onComplete={dismissChallenge}
+          />
+        );
+      })()}
 
       {/* Victory overlay */}
       {showVictoryOverlay && pendingWinnerId && (() => {

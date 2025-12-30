@@ -17,9 +17,15 @@ export function GameTable() {
   const playerCount = playerConfigs.length;
   const positions = PLAYER_POSITIONS[playerCount] ?? PLAYER_POSITIONS[4]!;
 
-  // Get opponents (everyone except human)
-  const opponents = playerConfigs.filter((p) => p.id !== humanPlayerId);
-  const opponentPositions = positions.slice(1); // First position is for human (bottom)
+  // In spectator mode, show all players; otherwise filter out human
+  const displayedPlayers = isSpectator 
+    ? playerConfigs 
+    : playerConfigs.filter((p) => p.id !== humanPlayerId);
+  
+  // In spectator mode, use all positions; otherwise skip bottom (human's position)
+  const playerPositions = isSpectator 
+    ? positions 
+    : positions.slice(1);
 
   // Get last claim info
   const lastClaim = observation.lastClaim;
@@ -83,29 +89,32 @@ export function GameTable() {
         </div>
       </div>
 
-      {/* Opponents */}
-      {opponents.map((opponent, index) => {
-        const position = opponentPositions[index];
+      {/* Players (all in spectator mode, opponents only in normal mode) */}
+      {displayedPlayers.map((player, index) => {
+        const position = playerPositions[index];
         if (!position) return null;
 
-        const handSize = observation.otherHandSizes.get(opponent.id) ?? 0;
+        // In spectator mode, get hand size from gameState; otherwise from observation
+        const handSize = isSpectator && gameState
+          ? (gameState.hands.get(player.id)?.length ?? 0)
+          : (observation.otherHandSizes.get(player.id) ?? 0);
 
-        const isCurrentPlayer = observation.currentPlayerId === opponent.id;
+        const isCurrentPlayer = observation.currentPlayerId === player.id;
 
         // Get actual cards in spectator mode
         const cards = isSpectator && gameState
-          ? gameState.hands.get(opponent.id) ?? []
+          ? gameState.hands.get(player.id) ?? []
           : undefined;
 
         return (
           <OpponentSlot
-            key={opponent.id}
+            key={player.id}
             position={position}
-            name={opponent.name}
-            avatar={opponent.avatar}
+            name={player.name}
+            avatar={player.avatar}
             handSize={handSize}
             isCurrentPlayer={isCurrentPlayer}
-            difficulty={opponent.botDifficulty}
+            difficulty={player.botDifficulty}
             cards={cards}
           />
         );

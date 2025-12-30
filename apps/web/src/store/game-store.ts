@@ -34,6 +34,7 @@ interface GameStore {
   isProcessingBots: boolean;
   showVictoryOverlay: boolean;
   pendingWinnerId: PlayerId | null;
+  activeChallenge: { challengerId: PlayerId; accusedId: PlayerId } | null;
   
   // Debug/Spectator
   debugMode: boolean;
@@ -61,6 +62,7 @@ interface GameStore {
   processBotChallenges: () => void;
   handleEvent: (event: GameEvent) => void;
   dismissVictoryOverlay: () => void;
+  dismissChallenge: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -82,6 +84,7 @@ export const useGameStore = create<GameStore>()(
     isProcessingBots: false,
     showVictoryOverlay: false,
     pendingWinnerId: null,
+    activeChallenge: null,
     
     debugMode: false,
     isSpectator: false,
@@ -165,6 +168,7 @@ export const useGameStore = create<GameStore>()(
         isProcessingBots: false,
         showVictoryOverlay: false,
         pendingWinnerId: null,
+        activeChallenge: null,
         debugMode: false,
         isSpectator: false,
       });
@@ -424,7 +428,7 @@ export const useGameStore = create<GameStore>()(
     },
     
     handleEvent: (event: GameEvent) => {
-      const { events } = get();
+      const { events, isSpectator } = get();
       set({ events: [...events, event] });
       
       if (event.type === 'PLAYER_WON') {
@@ -433,7 +437,28 @@ export const useGameStore = create<GameStore>()(
           showVictoryOverlay: true,
           pendingWinnerId: event.winnerId,
           showChallengeModal: false,
+          activeChallenge: null,
         });
+      }
+      
+      // Show challenge indicator in spectator mode
+      if (event.type === 'CHALLENGE_DECLARED' && isSpectator) {
+        set({
+          activeChallenge: {
+            challengerId: event.challengerId,
+            accusedId: event.accusedId,
+          },
+        });
+        
+        // Auto-dismiss after 2 seconds
+        setTimeout(() => {
+          get().dismissChallenge();
+        }, 2000);
+      }
+      
+      // Clear challenge indicator when challenge is resolved
+      if (event.type === 'CHALLENGE_RESOLVED') {
+        set({ activeChallenge: null });
       }
       
       get().updateObservation();
@@ -447,6 +472,10 @@ export const useGameStore = create<GameStore>()(
         winnerId: pendingWinnerId,
         pendingWinnerId: null,
       });
+    },
+    
+    dismissChallenge: () => {
+      set({ activeChallenge: null });
     },
   }))
 );

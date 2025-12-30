@@ -32,7 +32,7 @@ export function EventLog() {
         };
         return `🔥 Pöytä kaatui: ${reasons[event.reason]}`;
       case 'CARDS_DRAWN':
-        return `${getPlayerName(event.playerId)} nosti ${event.count} korttia`;
+        return `${getPlayerName(event.playerId)} nosti ${event.cardCount} korttia`;
       case 'TURN_ADVANCED':
         return `Vuoro: ${getPlayerName(event.nextPlayerId)}`;
       case 'PLAYER_WON':

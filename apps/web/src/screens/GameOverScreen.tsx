@@ -5,10 +5,11 @@ export function GameOverScreen() {
   const winnerId = useGameStore((state) => state.winnerId);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const humanPlayerId = useGameStore((state) => state.humanPlayerId);
+  const isSpectator = useGameStore((state) => state.isSpectator);
   const resetGame = useGameStore((state) => state.resetGame);
 
   const winner = playerConfigs.find((p) => p.id === winnerId);
-  const isHumanWinner = winnerId === humanPlayerId;
+  const isHumanWinner = !isSpectator && winnerId === humanPlayerId;
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center bg-bg-deep relative overflow-hidden">
@@ -51,14 +52,14 @@ export function GameOverScreen() {
         transition={{ duration: 0.6, type: 'spring' }}
         className="relative z-10 text-center"
       >
-        {/* Trophy or crying emoji */}
+        {/* Trophy, crying, or spectator emoji */}
         <motion.div
           initial={{ y: -50 }}
           animate={{ y: 0 }}
           transition={{ delay: 0.2, type: 'spring', bounce: 0.5 }}
           className="text-9xl mb-6"
         >
-          {isHumanWinner ? '🏆' : '😢'}
+          {isSpectator ? '🏆' : isHumanWinner ? '🏆' : '😢'}
         </motion.div>
 
         {/* Result text */}
@@ -67,10 +68,10 @@ export function GameOverScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className={`text-5xl font-serif font-bold mb-4 ${
-            isHumanWinner ? 'text-accent-gold text-shadow-gold' : 'text-slate-300'
+            isSpectator ? 'text-accent-gold text-shadow-gold' : isHumanWinner ? 'text-accent-gold text-shadow-gold' : 'text-slate-300'
           }`}
         >
-          {isHumanWinner ? 'Voitit!' : 'Hävisit!'}
+          {isSpectator ? 'Peli päättyi!' : isHumanWinner ? 'Voitit!' : 'Hävisit!'}
         </motion.h1>
 
         <motion.p
@@ -79,9 +80,11 @@ export function GameOverScreen() {
           transition={{ delay: 0.5 }}
           className="text-xl text-slate-400 mb-8"
         >
-          {isHumanWinner 
-            ? 'Onneksi olkoon! Olet mestari bluffaaja!' 
-            : `${winner?.name ?? 'Botti'} voitti pelin`
+          {isSpectator 
+            ? `${winner?.name ?? 'Botti'} voitti pelin!`
+            : isHumanWinner 
+              ? 'Onneksi olkoon! Olet mestari bluffaaja!' 
+              : `${winner?.name ?? 'Botti'} voitti pelin`
           }
         </motion.p>
 
