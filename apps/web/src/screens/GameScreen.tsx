@@ -7,6 +7,7 @@ import { DebugPanel } from '../components/DebugPanel';
 import { VictoryOverlay } from '../components/VictoryOverlay';
 import { ChallengeIndicator } from '../components/ChallengeIndicator';
 import { ChallengeRevealOverlay } from '../components/ChallengeRevealOverlay';
+import { SpeedControl } from '../components/SpeedControl';
 import { useGameStore } from '../store/game-store';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
@@ -62,9 +63,9 @@ export function GameScreen() {
 
       {/* Spectator controls */}
       {isSpectator && (
-        <div className="bg-bg-surface/80 backdrop-blur-sm border-t border-slate-700 px-4 py-3 text-center">
-          <div className="text-slate-400 text-sm">
-            Peli etenee automaattisesti...
+        <div className="bg-bg-surface/80 backdrop-blur-sm border-t border-slate-700 px-4 py-3">
+          <div className="flex items-center justify-center gap-6">
+            <SpeedControl />
           </div>
         </div>
       )}

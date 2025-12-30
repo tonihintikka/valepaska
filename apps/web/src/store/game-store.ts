@@ -49,6 +49,7 @@ interface GameStore {
   // Debug/Spectator
   debugMode: boolean;
   isSpectator: boolean;
+  gameSpeed: number; // Multiplier: 0.5 = slow, 1 = normal, 2 = fast, 4 = very fast
   
   // Bot instances
   bots: Map<PlayerId, RuleBot>;
@@ -65,6 +66,9 @@ interface GameStore {
   playCards: () => void;
   challenge: () => void;
   pass: () => void;
+  
+  // Spectator controls
+  setGameSpeed: (speed: number) => void;
   
   // Internal
   updateObservation: () => void;
@@ -100,6 +104,7 @@ export const useGameStore = create<GameStore>()(
     
     debugMode: false,
     isSpectator: false,
+    gameSpeed: 1,
     
     bots: new Map(),
     
@@ -160,7 +165,8 @@ export const useGameStore = create<GameStore>()(
       });
       
       // Start the game - bots will play automatically
-      setTimeout(() => get().processBotTurn(), 300);
+      const { gameSpeed } = get();
+      setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
     
     resetGame: () => {
@@ -184,6 +190,7 @@ export const useGameStore = create<GameStore>()(
         challengeReveal: null,
         debugMode: false,
         isSpectator: false,
+        gameSpeed: 1,
       });
     },
     
@@ -250,7 +257,8 @@ export const useGameStore = create<GameStore>()(
           
           set({ showChallengeModal: false });
           get().updateObservation();
-          setTimeout(() => get().processBotTurn(), 200);
+          const { gameSpeed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
           return;
         }
         
@@ -279,7 +287,8 @@ export const useGameStore = create<GameStore>()(
       set({ showChallengeModal: false });
       get().updateObservation();
       
-      setTimeout(() => get().processBotTurn(), 300);
+      const { gameSpeed } = get();
+      setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
     
     pass: () => {
@@ -304,7 +313,12 @@ export const useGameStore = create<GameStore>()(
       set({ showChallengeModal: false });
       get().updateObservation();
       
-      setTimeout(() => get().processBotTurn(), 200);
+      const { gameSpeed } = get();
+      setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
+    },
+    
+    setGameSpeed: (speed: number) => {
+      set({ gameSpeed: speed });
     },
     
     updateObservation: () => {
@@ -352,7 +366,8 @@ export const useGameStore = create<GameStore>()(
           get().processBotChallenges();
           engine.processChallenges();
           get().updateObservation();
-          setTimeout(() => get().processBotTurn(), 150);
+          const { gameSpeed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 150 / gameSpeed));
           return;
         }
         
@@ -382,7 +397,8 @@ export const useGameStore = create<GameStore>()(
             
             set({ showChallengeModal: false });
             get().updateObservation();
-            setTimeout(() => get().processBotTurn(), 100);
+            const { gameSpeed } = get();
+            setTimeout(() => get().processBotTurn(), Math.max(50, 100 / gameSpeed));
             return;
           }
           
@@ -405,14 +421,16 @@ export const useGameStore = create<GameStore>()(
       const move = bot.chooseMove(botObs);
       
       // Apply the move with a short delay for animation
+      const { gameSpeed } = get();
       setTimeout(() => {
         engine.submitMove(currentPlayerId, move);
         get().updateObservation();
         set({ isProcessingBots: false });
         
         // Continue with challenge window
-        setTimeout(() => get().processBotTurn(), 100);
-      }, 300);
+        const { gameSpeed: currentSpeed } = get();
+        setTimeout(() => get().processBotTurn(), Math.max(50, 100 / currentSpeed));
+      }, Math.max(50, 300 / gameSpeed));
     },
     
     processBotChallenges: () => {
