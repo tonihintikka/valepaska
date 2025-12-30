@@ -396,53 +396,98 @@ export class GameEngine {
 
     const newClaimHistory = [...this.state.claimHistory, claimRecord];
 
-    // Move table pile to penalty recipient
-    const penaltyCards = [...this.state.tablePile];
-    const newHands = new Map(this.state.hands);
-    const recipientHand = newHands.get(result.penaltyRecipient) ?? [];
-    newHands.set(result.penaltyRecipient, [...recipientHand, ...penaltyCards]);
+    // Check if burn should occur (only when claim was true and it's a burn rank)
+    const burnReason = !result.wasLie ? checkBurn(claimRank, this.state.claimHistory) : null;
 
-    this.state = {
-      ...this.state,
-      hands: newHands,
-      tablePile: [],
-      claimHistory: newClaimHistory,
-      lastPlay: null,
-      phase: 'WAITING_FOR_PLAY',
-    };
+    if (burnReason) {
+      // Burn the pile instead of giving it to challenger
+      const burnedCards = [...this.state.tablePile];
 
-    // Emit event
-    this.eventEmitter.emit('CHALLENGE_RESOLVED', {
-      challengerId,
-      accusedId,
-      wasLie: result.wasLie,
-      revealedCards: cards,
-      claimedRank: claimRank,
-      claimedCount: claimCount,
-      penaltyCardCount: penaltyCards.length,
-    });
+      this.state = {
+        ...this.state,
+        tablePile: [],
+        burnPile: [...this.state.burnPile, ...burnedCards],
+        claimHistory: [], // Reset claim history after burn
+        lastPlay: null,
+        phase: 'WAITING_FOR_PLAY',
+      };
 
-    // Check for win - the accused might have emptied their hand before challenge
-    // (if claim was true and it triggered a burn, or if endgame)
-    if (result.accusedContinues) {
-      // Honest player might have won - check for win
+      // Emit challenge resolved event (0 penalty cards since pile burned)
+      this.eventEmitter.emit('CHALLENGE_RESOLVED', {
+        challengerId,
+        accusedId,
+        wasLie: result.wasLie,
+        revealedCards: cards,
+        claimedRank: claimRank,
+        claimedCount: claimCount,
+        penaltyCardCount: 0,
+      });
+
+      // Emit burn event
+      this.eventEmitter.emit('PILE_BURNED', {
+        reason: burnReason,
+        cardCount: burnedCards.length,
+        triggeredBy: accusedId,
+      });
+
+      // Check for win (player who burned might have emptied their hand)
       this.checkForWin(accusedId);
-    }
 
-    if (this.state.phase === 'GAME_OVER') {
-      return; // Game ended, no need to advance turn or replenish
-    }
+      if (this.state.phase === 'GAME_OVER') {
+        return;
+      }
 
-    // Determine next player
-    if (result.accusedContinues) {
-      // Honest player continues - already their turn
+      // Honest player continues after burn
+      // Replenish hands
+      this.replenishAllHands();
     } else {
-      // Liar loses turn - advance to next player
-      this.advanceTurn();
-    }
+      // Normal challenge resolution - move pile to penalty recipient
+      const penaltyCards = [...this.state.tablePile];
+      const newHands = new Map(this.state.hands);
+      const recipientHand = newHands.get(result.penaltyRecipient) ?? [];
+      newHands.set(result.penaltyRecipient, [...recipientHand, ...penaltyCards]);
 
-    // Replenish hands
-    this.replenishAllHands();
+      this.state = {
+        ...this.state,
+        hands: newHands,
+        tablePile: [],
+        claimHistory: newClaimHistory,
+        lastPlay: null,
+        phase: 'WAITING_FOR_PLAY',
+      };
+
+      // Emit event
+      this.eventEmitter.emit('CHALLENGE_RESOLVED', {
+        challengerId,
+        accusedId,
+        wasLie: result.wasLie,
+        revealedCards: cards,
+        claimedRank: claimRank,
+        claimedCount: claimCount,
+        penaltyCardCount: penaltyCards.length,
+      });
+
+      // Check for win - the accused might have emptied their hand before challenge
+      if (result.accusedContinues) {
+        // Honest player might have won - check for win
+        this.checkForWin(accusedId);
+      }
+
+      if (this.state.phase === 'GAME_OVER') {
+        return; // Game ended, no need to advance turn or replenish
+      }
+
+      // Determine next player
+      if (result.accusedContinues) {
+        // Honest player continues - already their turn
+      } else {
+        // Liar loses turn - advance to next player
+        this.advanceTurn();
+      }
+
+      // Replenish hands
+      this.replenishAllHands();
+    }
   }
 
   /**
