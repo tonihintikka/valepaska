@@ -56,29 +56,32 @@ Feature: Claim Progression
     Then the move should be <result>
 
     Examples:
-      | last_rank | new_rank | result   |
-      | 3         | 3        | accepted |
-      | 3         | 4        | accepted |
-      | 3         | 10       | accepted |
-      | 3         | A        | accepted |
-      | 3         | 2        | accepted |
-      | 3         | J        | rejected |
-      | 3         | Q        | rejected |
-      | 3         | K        | rejected |
-      | 7         | 7        | accepted |
-      | 7         | J        | accepted |
-      | 7         | Q        | accepted |
-      | 7         | K        | accepted |
-      | 7         | 10       | accepted |
-      | 7         | 6        | rejected |
-      | 7         | 3        | rejected |
-      | K         | K        | accepted |
-      | K         | A        | accepted |
-      | K         | 2        | accepted |
-      | K         | Q        | rejected |
-      | A         | A        | accepted |
-      | A         | 2        | accepted |
-      | A         | K        | rejected |
+      | last_rank | new_rank | result   | comment                              |
+      | 3         | 3        | accepted | same rank                            |
+      | 3         | 4        | accepted | higher rank                          |
+      | 3         | 10       | accepted | 10 burns number cards                |
+      | 3         | A        | rejected | A only burns face cards (J,Q,K)      |
+      | 3         | 2        | accepted | 2 is wildcard                        |
+      | 3         | J        | rejected | face cards need lastClaim >= 7       |
+      | 3         | Q        | rejected | face cards need lastClaim >= 7       |
+      | 3         | K        | rejected | face cards need lastClaim >= 7       |
+      | 7         | 7        | accepted | same rank                            |
+      | 7         | J        | accepted | face cards allowed after 7           |
+      | 7         | Q        | accepted | face cards allowed after 7           |
+      | 7         | K        | accepted | face cards allowed after 7           |
+      | 7         | 10       | accepted | 10 burns number cards (7 is number)  |
+      | 7         | A        | rejected | A only burns face cards              |
+      | 7         | 6        | rejected | lower rank                           |
+      | 7         | 3        | rejected | lower rank                           |
+      | J         | A        | accepted | A burns face cards                   |
+      | J         | 10       | rejected | 10 cannot be played on face cards    |
+      | K         | K        | accepted | same rank                            |
+      | K         | A        | accepted | A burns face cards                   |
+      | K         | 2        | accepted | 2 is wildcard                        |
+      | K         | Q        | rejected | lower rank                           |
+      | A         | A        | accepted | same rank                            |
+      | A         | 2        | accepted | 2 is wildcard                        |
+      | A         | K        | rejected | lower rank                           |
 
   @progression @special-rule
   Scenario: 2 can be claimed anytime (wildcard)
@@ -135,11 +138,31 @@ Feature: Claim Progression
     When player 2 plays cards claiming rank "J"
     Then the move should be accepted
 
-  @progression @face-cards
-  Scenario: Special ranks (10, A, 2) always allowed for progression
+  @progression @burn-cards
+  Scenario: 10 burns number cards (3-9)
     Given the last claim was rank "5"
     When player 2 plays cards claiming rank "10"
     Then the move should be accepted
+    And the table should burn
+
+  @progression @burn-cards
+  Scenario: A burns face cards (J, Q, K)
+    Given the last claim was rank "J"
+    When player 2 plays cards claiming rank "A"
+    Then the move should be accepted
+    And the table should burn
+
+  @progression @burn-cards @validation
+  Scenario: A cannot be played on number cards
+    Given the last claim was rank "7"
+    When player 2 tries to play cards claiming rank "A"
+    Then the move should be rejected with error "A can only be claimed on face cards (J, Q, K)"
+
+  @progression @burn-cards @validation
+  Scenario: 10 cannot be played on face cards
+    Given the last claim was rank "J"
+    When player 2 tries to play cards claiming rank "10"
+    Then the move should be rejected with error "10 can only be claimed on number cards (3-9)"
 
   @progression @rank-order
   Scenario: Rank order is correct

@@ -96,15 +96,40 @@ describe('Rank utilities', () => {
       expect(valid).toEqual([...RANKS]);
     });
 
-    it('should return same or higher for normal ranks (excluding J,Q,K before 7)', () => {
+    it('should return same or higher for normal ranks (excluding J,Q,K before 7, A only on face cards)', () => {
       const valid = getValidClaimRanks('5');
       // J, Q, K not allowed before reaching 7
-      expect(valid).toEqual(['5', '6', '7', '8', '9', '10', 'A', '2']);
+      // A not allowed on number cards (only on face cards J, Q, K)
+      expect(valid).toEqual(['5', '6', '7', '8', '9', '10', '2']);
     });
 
-    it('should return same or higher including face cards after reaching 7', () => {
+    it('should return same or higher including face cards after reaching 7 (A only on face cards)', () => {
       const valid = getValidClaimRanks('7');
-      expect(valid).toEqual(['7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2']);
+      // A not allowed on number cards (7 is still a number card)
+      expect(valid).toEqual(['7', '8', '9', '10', 'J', 'Q', 'K', '2']);
+    });
+
+    it('should allow A after face cards (J, Q, K)', () => {
+      const validJ = getValidClaimRanks('J');
+      expect(validJ).toContain('A');
+      expect(validJ).toEqual(['J', 'Q', 'K', 'A', '2']);
+      
+      const validQ = getValidClaimRanks('Q');
+      expect(validQ).toContain('A');
+      
+      const validK = getValidClaimRanks('K');
+      expect(validK).toContain('A');
+    });
+
+    it('should allow 10 on number cards (3-9) but not on face cards', () => {
+      // 10 valid on number cards
+      expect(getValidClaimRanks('5')).toContain('10');
+      expect(getValidClaimRanks('9')).toContain('10');
+      
+      // 10 not valid on face cards (already passed in rank order)
+      expect(getValidClaimRanks('J')).not.toContain('10');
+      expect(getValidClaimRanks('Q')).not.toContain('10');
+      expect(getValidClaimRanks('K')).not.toContain('10');
     });
 
     it('should return only 2, 10, A after 2 (special rule)', () => {
@@ -185,10 +210,20 @@ describe('Rank utilities', () => {
         expect(isValidClaimRank('K', '9')).toBe(true);
       });
 
-      it('should always allow 10, A, 2 (special ranks)', () => {
+      it('should allow 10 on number cards, A on face cards, 2 anywhere (burn/wildcard rules)', () => {
+        // 10 burns number cards (3-9), so valid on them
         expect(isValidClaimRank('10', '5')).toBe(true);
-        expect(isValidClaimRank('A', '5')).toBe(true);
+        expect(isValidClaimRank('10', '9')).toBe(true);
+        
+        // A burns face cards (J, Q, K), NOT valid on number cards
+        expect(isValidClaimRank('A', '5')).toBe(false);
+        expect(isValidClaimRank('A', 'J')).toBe(true);
+        expect(isValidClaimRank('A', 'Q')).toBe(true);
+        expect(isValidClaimRank('A', 'K')).toBe(true);
+        
+        // 2 is wildcard - always valid
         expect(isValidClaimRank('2', '5')).toBe(true);
+        expect(isValidClaimRank('2', 'J')).toBe(true);
       });
     });
   });

@@ -116,12 +116,38 @@ export function getValidClaimRanks(lastClaimRank: Rank | null, options: ClaimRan
     }
   }
 
-  // Get ranks >= lastClaimRank
-  let validRanks = getRanksGte(lastClaimRank);
+  // Build valid ranks based on lastClaimRank
+  let validRanks: Rank[] = [];
+  
+  // Check if lastClaimRank is a number card (3-9, NOT 10)
+  const isLastRankNumber = ['3', '4', '5', '6', '7', '8', '9'].includes(lastClaimRank);
+  // Check if lastClaimRank is a face card (J, Q, K)
+  const isLastRankFace = FACE_RANKS.includes(lastClaimRank);
+  
+  // Get ranks >= lastClaimRank as base
+  validRanks = getRanksGte(lastClaimRank);
+  
+  // Special burn card rules:
+  // 10 can ONLY be played on number cards (3-9), burns them
+  // A can ONLY be played on face cards (J, Q, K), burns them
+  
+  if (isLastRankNumber) {
+    // On number cards (3-9): 10 is valid (burns), A is NOT valid
+    validRanks = validRanks.filter(r => r !== 'A');
+  } else if (lastClaimRank === '10') {
+    // On 10: normal progression (J, Q, K, A allowed), but NOT 10 again for burn
+    // Actually 10 can be played on 10 for normal progression
+  } else if (isLastRankFace) {
+    // On face cards (J, Q, K): A is valid (burns), 10 is NOT valid (already passed)
+    validRanks = validRanks.filter(r => r !== '10');
+  } else if (lastClaimRank === 'A') {
+    // On A: only 2 is higher (and 2 is wildcard anyway)
+    // 10 cannot be played on A
+    validRanks = validRanks.filter(r => r !== '10');
+  }
   
   // Face card restriction: J, Q, K only allowed after claim >= 7
   if (isRankLt(lastClaimRank, FACE_CARD_THRESHOLD)) {
-    // Filter out J, Q, K (but keep 10, A, 2 which are special)
     validRanks = validRanks.filter(r => !FACE_RANKS.includes(r));
   }
   
