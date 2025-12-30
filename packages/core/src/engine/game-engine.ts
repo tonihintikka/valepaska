@@ -230,14 +230,15 @@ export class GameEngine {
     // Get last accepted claim rank
     const lastClaimRank = this.getLastAcceptedClaimRank();
 
-    // Validate the move
+    // Validate the move (pass deck state for starting claim rules)
     const validation = validatePlay(
       move.cardIds,
       move.claimRank,
       move.claimCount,
       hand,
       lastClaimRank,
-      this.state.config
+      this.state.config,
+      { deckHasCards: this.state.drawPile.length > 0 }
     );
 
     if (!validation.valid) {

@@ -85,12 +85,23 @@ describe('Rank utilities', () => {
   });
 
   describe('getValidClaimRanks()', () => {
-    it('should return all ranks when no previous claim', () => {
-      const valid = getValidClaimRanks(null);
+    it('should return only number cards (3-10) when starting and deck has cards', () => {
+      const valid = getValidClaimRanks(null); // default: deckHasCards = true
+      expect(valid).toEqual(['3', '4', '5', '6', '7', '8', '9', '10']);
+    });
+
+    it('should return all ranks when starting and deck is empty', () => {
+      const valid = getValidClaimRanks(null, { deckHasCards: false });
       expect(valid).toEqual([...RANKS]);
     });
 
-    it('should return same or higher for normal ranks', () => {
+    it('should return same or higher for normal ranks (excluding J,Q,K before 7)', () => {
+      const valid = getValidClaimRanks('5');
+      // J, Q, K not allowed before reaching 7
+      expect(valid).toEqual(['5', '6', '7', '8', '9', '10', 'A', '2']);
+    });
+
+    it('should return same or higher including face cards after reaching 7', () => {
       const valid = getValidClaimRanks('7');
       expect(valid).toEqual(['7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2']);
     });
@@ -140,10 +151,41 @@ describe('Rank utilities', () => {
     });
 
     describe('first claim', () => {
-      it('should allow any rank', () => {
-        for (const rank of RANKS) {
+      it('should allow only number cards (3-10) when deck has cards', () => {
+        // Number cards allowed
+        for (const rank of ['3', '4', '5', '6', '7', '8', '9', '10'] as const) {
           expect(isValidClaimRank(rank, null)).toBe(true);
         }
+        // Face cards not allowed when deck has cards
+        for (const rank of ['J', 'Q', 'K', 'A', '2'] as const) {
+          expect(isValidClaimRank(rank, null)).toBe(false);
+        }
+      });
+
+      it('should allow any rank when deck is empty', () => {
+        for (const rank of RANKS) {
+          expect(isValidClaimRank(rank, null, { deckHasCards: false })).toBe(true);
+        }
+      });
+    });
+
+    describe('face card restrictions', () => {
+      it('should not allow J, Q, K before reaching 7', () => {
+        expect(isValidClaimRank('J', '5')).toBe(false);
+        expect(isValidClaimRank('Q', '6')).toBe(false);
+        expect(isValidClaimRank('K', '4')).toBe(false);
+      });
+
+      it('should allow J, Q, K after reaching 7', () => {
+        expect(isValidClaimRank('J', '7')).toBe(true);
+        expect(isValidClaimRank('Q', '8')).toBe(true);
+        expect(isValidClaimRank('K', '9')).toBe(true);
+      });
+
+      it('should always allow 10, A, 2 (special ranks)', () => {
+        expect(isValidClaimRank('10', '5')).toBe(true);
+        expect(isValidClaimRank('A', '5')).toBe(true);
+        expect(isValidClaimRank('2', '5')).toBe(true);
       });
     });
   });

@@ -38,10 +38,33 @@ describe('Claim Rules', () => {
       expect(invalid.error).toContain('only 2, 10, or A');
     });
 
-    it('should accept any rank when no previous claim', () => {
+    it('should accept only number cards when starting and deck has cards', () => {
       expect(validateClaimRank('3', null).valid).toBe(true);
-      expect(validateClaimRank('K', null).valid).toBe(true);
-      expect(validateClaimRank('2', null).valid).toBe(true);
+      expect(validateClaimRank('7', null).valid).toBe(true);
+      expect(validateClaimRank('10', null).valid).toBe(true);
+      // Face cards not allowed when starting with deck
+      expect(validateClaimRank('K', null).valid).toBe(false);
+      expect(validateClaimRank('A', null).valid).toBe(false);
+      expect(validateClaimRank('2', null).valid).toBe(false);
+    });
+
+    it('should accept any rank when starting and deck is empty', () => {
+      const options = { deckHasCards: false };
+      expect(validateClaimRank('3', null, options).valid).toBe(true);
+      expect(validateClaimRank('K', null, options).valid).toBe(true);
+      expect(validateClaimRank('2', null, options).valid).toBe(true);
+    });
+
+    it('should not allow J, Q, K before reaching 7', () => {
+      expect(validateClaimRank('J', '5').valid).toBe(false);
+      expect(validateClaimRank('Q', '6').valid).toBe(false);
+      expect(validateClaimRank('K', '4').valid).toBe(false);
+    });
+
+    it('should allow J, Q, K after reaching 7', () => {
+      expect(validateClaimRank('J', '7').valid).toBe(true);
+      expect(validateClaimRank('Q', '8').valid).toBe(true);
+      expect(validateClaimRank('K', '9').valid).toBe(true);
     });
   });
 

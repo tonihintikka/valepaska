@@ -27,8 +27,11 @@ export function createObservation(
   // Get last accepted claim rank for valid ranks calculation
   const lastAcceptedClaimRank = getLastAcceptedClaimRank(state.claimHistory);
 
-  // Get valid claim ranks
-  const validClaimRanks = getValidClaimRanks(lastAcceptedClaimRank);
+  // Get valid claim ranks (considering deck state and hand for face card rules)
+  const validClaimRanks = getValidClaimRanks(lastAcceptedClaimRank, {
+    deckHasCards: state.drawPile.length > 0,
+    hand: hand,
+  });
 
   // Get last claim
   const lastClaim = state.claimHistory.length > 0 

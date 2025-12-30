@@ -59,14 +59,57 @@ export function getRanksGt(rank: Rank): Rank[] {
 export const VALID_AFTER_TWO: readonly Rank[] = ['2', '10', 'A'] as const;
 
 /**
- * Gets valid claim ranks based on the last claim
+ * Number cards (3-10) - valid for starting claims when deck has cards
+ */
+export const NUMBER_RANKS: readonly Rank[] = ['3', '4', '5', '6', '7', '8', '9', '10'] as const;
+
+/**
+ * Face cards (J, Q, K) - only valid after claim >= 7
+ */
+export const FACE_RANKS: readonly Rank[] = ['J', 'Q', 'K'] as const;
+
+/**
+ * Minimum rank before face cards (J, Q, K) can be claimed
+ */
+export const FACE_CARD_THRESHOLD: Rank = '7';
+
+/**
+ * Options for getting valid claim ranks
+ */
+export interface ClaimRankOptions {
+  /** Whether the deck still has cards */
+  deckHasCards?: boolean;
+  /** Player's current hand (for checking if only face cards) */
+  hand?: readonly { rank: Rank }[];
+}
+
+/**
+ * Gets valid claim ranks based on the last claim and game state
  * @param lastClaimRank The rank of the last accepted claim, or null if no claim
+ * @param options Additional options for validation
  * @returns Array of valid ranks that can be claimed
  */
-export function getValidClaimRanks(lastClaimRank: Rank | null): Rank[] {
-  // No previous claim - any rank is valid
+export function getValidClaimRanks(lastClaimRank: Rank | null, options: ClaimRankOptions = {}): Rank[] {
+  const { deckHasCards = true, hand = [] } = options;
+  
+  // Check if hand has only face cards (J, Q, K, A, 2)
+  const hasOnlyFaceCards = hand.length > 0 && hand.every(
+    card => FACE_RANKS.includes(card.rank as Rank) || card.rank === 'A' || card.rank === '2'
+  );
+  
+  // No previous claim - starting a new round
   if (lastClaimRank === null) {
-    return [...RANKS];
+    // If deck has cards, must start with number card (3-10)
+    // Exception: if hand has only face cards and deck is empty, allow face cards
+    if (deckHasCards) {
+      return [...NUMBER_RANKS];
+    } else if (hasOnlyFaceCards) {
+      // Deck empty and only face cards - can start with any rank
+      return [...RANKS];
+    } else {
+      // Deck empty - prefer number cards but allow face cards if needed
+      return [...RANKS];
+    }
   }
 
   // Special rule: after 2, only 2, 10, or A
@@ -74,15 +117,23 @@ export function getValidClaimRanks(lastClaimRank: Rank | null): Rank[] {
     return [...VALID_AFTER_TWO];
   }
 
-  // Normal rule: same or higher
-  return getRanksGte(lastClaimRank);
+  // Get ranks >= lastClaimRank
+  const validRanks = getRanksGte(lastClaimRank);
+  
+  // Face card restriction: J, Q, K only allowed after claim >= 7
+  if (isRankLt(lastClaimRank, FACE_CARD_THRESHOLD)) {
+    // Filter out J, Q, K (but keep 10, A, 2 which are special)
+    return validRanks.filter(r => !FACE_RANKS.includes(r));
+  }
+
+  return validRanks;
 }
 
 /**
  * Checks if a claim rank is valid given the last claim
  */
-export function isValidClaimRank(claimRank: Rank, lastClaimRank: Rank | null): boolean {
-  const validRanks = getValidClaimRanks(lastClaimRank);
+export function isValidClaimRank(claimRank: Rank, lastClaimRank: Rank | null, options: ClaimRankOptions = {}): boolean {
+  const validRanks = getValidClaimRanks(lastClaimRank, options);
   return validRanks.includes(claimRank);
 }
 

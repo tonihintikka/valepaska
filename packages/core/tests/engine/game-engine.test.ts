@@ -79,8 +79,9 @@ describe('GameEngine', () => {
       const engine = GameEngine.create(players, {}, 12345);
       const obs = engine.getObservation('p1');
 
-      // First claim can be any rank
-      expect(obs.validClaimRanks).toHaveLength(13);
+      // First claim must be number card (3-10) when deck has cards
+      expect(obs.validClaimRanks).toHaveLength(8); // 3,4,5,6,7,8,9,10
+      expect(obs.validClaimRanks).toEqual(['3', '4', '5', '6', '7', '8', '9', '10']);
     });
   });
 
@@ -95,7 +96,8 @@ describe('GameEngine', () => {
       const obs = engine.getObservation('p1');
       const cardToPlay = obs.hand[0]!;
       
-      const move = createPlayMove('p1', [cardToPlay.id], cardToPlay.rank);
+      // First claim must be a number card (3-10), so we claim '7' (may be a lie)
+      const move = createPlayMove('p1', [cardToPlay.id], '7');
       engine.submitMove('p1', move);
 
       expect(engine.getCurrentPhase()).toBe('WAITING_FOR_CHALLENGES');
@@ -116,7 +118,8 @@ describe('GameEngine', () => {
       const obs = engine.getObservation('p1');
       const cardToPlay = obs.hand[0]!;
       
-      const move = createPlayMove('p1', [cardToPlay.id], cardToPlay.rank);
+      // First claim must be a number card (3-10)
+      const move = createPlayMove('p1', [cardToPlay.id], '7');
       engine.submitMove('p1', move);
 
       const playEvent = events.find((e) => e.type === 'PLAY_MADE');
@@ -131,7 +134,8 @@ describe('GameEngine', () => {
       engine = GameEngine.create(players, {}, 12345);
       const obs = engine.getObservation('p1');
       const cardToPlay = obs.hand[0]!;
-      const move = createPlayMove('p1', [cardToPlay.id], cardToPlay.rank);
+      // First claim must be a number card (3-10)
+      const move = createPlayMove('p1', [cardToPlay.id], '7');
       engine.submitMove('p1', move);
     });
 

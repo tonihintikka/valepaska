@@ -1,7 +1,7 @@
 import type { Card, Rank } from '../types/card.js';
 import type { Claim, ClaimRecord } from '../types/claim.js';
 import type { GameConfig } from '../types/game-state.js';
-import { getValidClaimRanks, isValidClaimRank } from '../utils/rank-utils.js';
+import { getValidClaimRanks, isValidClaimRank, type ClaimRankOptions, FACE_RANKS, FACE_CARD_THRESHOLD, isRankLt } from '../utils/rank-utils.js';
 
 /**
  * Claim validation result
@@ -16,15 +16,35 @@ export interface ClaimValidationResult {
  */
 export function validateClaimRank(
   claimRank: Rank,
-  lastClaimRank: Rank | null
+  lastClaimRank: Rank | null,
+  options: ClaimRankOptions = {}
 ): ClaimValidationResult {
-  if (!isValidClaimRank(claimRank, lastClaimRank)) {
+  if (!isValidClaimRank(claimRank, lastClaimRank, options)) {
+    // Specific error messages
     if (lastClaimRank === '2') {
       return {
         valid: false,
         error: 'After 2, only 2, 10, or A are valid claims',
       };
     }
+    
+    // Starting claim restriction
+    if (lastClaimRank === null && options.deckHasCards) {
+      return {
+        valid: false,
+        error: 'Starting claim must be a number card (3-10) while deck has cards',
+      };
+    }
+    
+    // Face card restriction (J, Q, K only after 7)
+    if (lastClaimRank !== null && isRankLt(lastClaimRank, FACE_CARD_THRESHOLD) && 
+        FACE_RANKS.includes(claimRank as typeof FACE_RANKS[number])) {
+      return {
+        valid: false,
+        error: 'Face cards (J, Q, K) can only be claimed after reaching 7 or higher',
+      };
+    }
+    
     return {
       valid: false,
       error: 'Claim rank must be same or higher than last claim',
@@ -84,7 +104,8 @@ export function validatePlay(
   claimCount: number,
   hand: readonly Card[],
   lastClaimRank: Rank | null,
-  config: GameConfig
+  config: GameConfig,
+  options: ClaimRankOptions = {}
 ): ClaimValidationResult {
   // Validate card count
   const cardCountResult = validateCardCount(cardIds.length, config);
@@ -103,8 +124,12 @@ export function validatePlay(
     return cardsInHandResult;
   }
 
-  // Validate claim rank progression
-  const rankResult = validateClaimRank(claimRank, lastClaimRank);
+  // Validate claim rank progression (with deck state and hand for face card rules)
+  const rankOptions: ClaimRankOptions = {
+    ...options,
+    hand: hand, // Pass hand for checking if only face cards
+  };
+  const rankResult = validateClaimRank(claimRank, lastClaimRank, rankOptions);
   if (!rankResult.valid) {
     return rankResult;
   }
@@ -157,5 +182,5 @@ export function getLastAcceptedClaimRank(history: readonly ClaimRecord[]): Rank 
 /**
  * Re-export for convenience
  */
-export { getValidClaimRanks, isValidClaimRank };
+export { getValidClaimRanks, isValidClaimRank, type ClaimRankOptions };
 
