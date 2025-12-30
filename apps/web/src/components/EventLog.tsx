@@ -34,9 +34,9 @@ export function EventLog() {
       case 'CARDS_DRAWN':
         return `${getPlayerName(event.playerId)} nosti ${event.cardCount} korttia`;
       case 'TURN_ADVANCED':
-        return `Vuoro: ${getPlayerName(event.nextPlayerId)}`;
+        return `Vuoro: ${getPlayerName(event.currentPlayerId)}`;
       case 'PLAYER_WON':
-        return `🏆 ${getPlayerName(event.playerId)} voitti pelin!`;
+        return `🏆 ${getPlayerName(event.winnerId)} voitti pelin!`;
       case 'GAME_STARTED':
         return 'Peli alkoi!';
       default:
