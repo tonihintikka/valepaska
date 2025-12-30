@@ -1,5 +1,5 @@
 import type { Card, Rank } from '../types/card.js';
-import type { Claim, ClaimRecord } from '../types/claim.js';
+import type { ClaimRecord } from '../types/claim.js';
 import type { GameConfig } from '../types/game-state.js';
 import { getValidClaimRanks, isValidClaimRank, type ClaimRankOptions, FACE_RANKS, FACE_CARD_THRESHOLD, isRankLt } from '../utils/rank-utils.js';
 

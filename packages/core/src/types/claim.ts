@@ -44,8 +44,8 @@ export function createClaimRecord(
   return {
     ...claim,
     accepted,
-    challengedBy,
-    wasLie,
+    ...(challengedBy !== undefined && { challengedBy }),
+    ...(wasLie !== undefined && { wasLie }),
   };
 }
 

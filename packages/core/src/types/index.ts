@@ -69,8 +69,6 @@ export {
   DEFAULT_GAME_CONFIG,
   createInitialGameState,
   getCurrentPlayer,
-  getNextPlayerIndex,
-  isEndgame,
   getLastAcceptedClaim,
 } from './game-state.js';
 
