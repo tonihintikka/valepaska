@@ -3,6 +3,16 @@ import type { ClaimRecord } from './claim.js';
 import type { Player, PlayerId } from './player.js';
 
 /**
+ * Player standing (ranking)
+ */
+export interface PlayerStanding {
+  readonly playerId: PlayerId;
+  readonly position: number; // 1 = 1st place (Winner), 2 = 2nd, etc.
+  readonly score: number;
+  readonly finishedAtRound: number;
+}
+
+/**
  * Game phases
  */
 export type GamePhase =
@@ -59,7 +69,9 @@ export interface GameState {
   readonly config: GameConfig;
   readonly seed: number;
   readonly roundNumber: number;
-  readonly winnerId: PlayerId | null;
+  readonly winnerId: PlayerId | null; // Deprecated: use standings[0] instead
+  readonly standings: readonly PlayerStanding[]; // Players who have finished, ordered by position
+  readonly activePlayerIds: readonly PlayerId[]; // Players still in the game
 }
 
 /**
@@ -84,6 +96,8 @@ export function createInitialGameState(
     seed,
     roundNumber: 0,
     winnerId: null,
+    standings: [],
+    activePlayerIds: players.map(p => p.id),
   };
 }
 

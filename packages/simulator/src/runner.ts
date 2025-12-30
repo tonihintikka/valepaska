@@ -63,6 +63,8 @@ export function runSimulation(config: SimulationConfig): SimulationResults {
     let gameRounds = 0;
     engine.on<GameOverEvent>('GAME_OVER', (event) => {
       gameRounds = event.totalRounds;
+      // Winner is now the first player in standings (position 1)
+      // For backward compatibility, event.winnerId is still available
     });
 
     // Register bots

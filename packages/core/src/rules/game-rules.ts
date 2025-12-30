@@ -1,31 +1,43 @@
 import type { Card } from '../types/card.js';
-import type { GameConfig } from '../types/game-state.js';
+import type { GameConfig, PlayerStanding } from '../types/game-state.js';
 import type { PlayerId } from '../types/player.js';
 
 /**
- * Checks if a player has won
- * A player wins when:
+ * Checks if a player has finished (emptied their hand)
+ * A player finishes when:
  * 1. Draw pile is empty (endgame)
  * 2. They have no cards in hand
  * 3. Their last play was not challenged or challenge failed (claim was true)
+ */
+export function checkFinishCondition(
+  handSize: number,
+  drawPileSize: number,
+  lastPlayWasChallengedSuccessfully: boolean
+): boolean {
+  // Cannot finish while draw pile has cards
+  if (drawPileSize > 0) {
+    return false;
+  }
+
+  // Cannot finish if caught lying on final play
+  if (lastPlayWasChallengedSuccessfully) {
+    return false;
+  }
+
+  // Finish when hand is empty in endgame
+  return handSize === 0;
+}
+
+/**
+ * Checks if a player has won (deprecated: use checkFinishCondition)
+ * @deprecated Use checkFinishCondition instead
  */
 export function checkWinCondition(
   handSize: number,
   drawPileSize: number,
   lastPlayWasChallengedSuccessfully: boolean
 ): boolean {
-  // Cannot win while draw pile has cards
-  if (drawPileSize > 0) {
-    return false;
-  }
-
-  // Cannot win if caught lying on final play
-  if (lastPlayWasChallengedSuccessfully) {
-    return false;
-  }
-
-  // Win when hand is empty in endgame
-  return handSize === 0;
+  return checkFinishCondition(handSize, drawPileSize, lastPlayWasChallengedSuccessfully);
 }
 
 /**
@@ -137,7 +149,39 @@ export function isEndgame(drawPileSize: number): boolean {
 }
 
 /**
- * Calculates final standings
+ * Calculates score for a position
+ * Formula: (TotalPlayers - Position) × 100
+ * Optional bonus: +50 for perfect game (no cards drawn)
+ */
+export function calculateScore(
+  position: number,
+  totalPlayers: number,
+  perfectGame: boolean = false
+): number {
+  const baseScore = (totalPlayers - position) * 100;
+  return perfectGame ? baseScore + 50 : baseScore;
+}
+
+/**
+ * Creates a player standing
+ */
+export function createPlayerStanding(
+  playerId: PlayerId,
+  position: number,
+  totalPlayers: number,
+  finishedAtRound: number,
+  perfectGame: boolean = false
+): PlayerStanding {
+  return {
+    playerId,
+    position,
+    score: calculateScore(position, totalPlayers, perfectGame),
+    finishedAtRound,
+  };
+}
+
+/**
+ * Calculates final standings (deprecated: use createPlayerStanding)
  */
 export function calculateFinalStandings(
   hands: ReadonlyMap<PlayerId, readonly Card[]>,

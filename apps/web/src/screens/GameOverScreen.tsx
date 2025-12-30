@@ -3,6 +3,7 @@ import { useGameStore } from '../store/game-store';
 
 export function GameOverScreen() {
   const winnerId = useGameStore((state) => state.winnerId);
+  const standings = useGameStore((state) => state.standings);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const humanPlayerId = useGameStore((state) => state.humanPlayerId);
   const isSpectator = useGameStore((state) => state.isSpectator);
@@ -10,6 +11,12 @@ export function GameOverScreen() {
 
   const winner = playerConfigs.find((p) => p.id === winnerId);
   const isHumanWinner = !isSpectator && winnerId === humanPlayerId;
+  
+  // Get player info for each standing
+  const standingsWithPlayers = standings.map(standing => ({
+    ...standing,
+    player: playerConfigs.find(p => p.id === standing.playerId),
+  })).filter(s => s.player); // Filter out any missing players
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center bg-bg-deep relative overflow-hidden">
@@ -88,21 +95,88 @@ export function GameOverScreen() {
           }
         </motion.p>
 
-        {/* Stats card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="glass rounded-2xl p-6 mb-8 max-w-sm mx-auto"
-        >
-          <h3 className="text-lg font-medium text-slate-300 mb-4">Pelin tilastot</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="text-slate-400">Voittaja</div>
-            <div className="text-white font-medium">{winner?.name}</div>
-            <div className="text-slate-400">Vaikeustaso</div>
-            <div className="text-white font-medium">{winner?.botDifficulty ?? 'Ihminen'}</div>
-          </div>
-        </motion.div>
+        {/* Leaderboard */}
+        {standingsWithPlayers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="glass rounded-2xl p-6 mb-8 max-w-2xl mx-auto w-full"
+          >
+            <h3 className="text-lg font-medium text-slate-300 mb-4 text-center">Tulostaulukko</h3>
+            <div className="space-y-2">
+              {standingsWithPlayers.map((standing, index) => {
+                const isLoser = standing.position === standingsWithPlayers.length;
+                const isHuman = !isSpectator && standing.playerId === humanPlayerId;
+                return (
+                  <motion.div
+                    key={standing.playerId}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 + index * 0.1 }}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      isLoser 
+                        ? 'bg-red-500/10 border border-red-500/30' 
+                        : standing.position === 1
+                        ? 'bg-accent-gold/10 border border-accent-gold/30'
+                        : 'bg-slate-800/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`text-2xl font-bold ${
+                        standing.position === 1 ? 'text-accent-gold' : 
+                        isLoser ? 'text-red-400' : 'text-slate-400'
+                      }`}>
+                        {standing.position === 1 ? '🏆' : 
+                         isLoser ? '😢' : 
+                         standing.position === 2 ? '🥈' : 
+                         standing.position === 3 ? '🥉' : 
+                         `${standing.position}.`}
+                      </div>
+                      <div>
+                        <div className={`font-medium ${
+                          isHuman ? 'text-accent-ice' : 'text-white'
+                        }`}>
+                          {standing.player?.name}
+                          {isHuman && ' (Sinä)'}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          {standing.player?.botDifficulty ?? 'Ihminen'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-accent-gold">
+                        {standing.score}p
+                      </div>
+                      {isLoser && (
+                        <div className="text-xs text-red-400 font-medium">Valepaska</div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Fallback stats card if no standings */}
+        {standingsWithPlayers.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="glass rounded-2xl p-6 mb-8 max-w-sm mx-auto"
+          >
+            <h3 className="text-lg font-medium text-slate-300 mb-4">Pelin tilastot</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="text-slate-400">Voittaja</div>
+              <div className="text-white font-medium">{winner?.name}</div>
+              <div className="text-slate-400">Vaikeustaso</div>
+              <div className="text-white font-medium">{winner?.botDifficulty ?? 'Ihminen'}</div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Action buttons */}
         <motion.div

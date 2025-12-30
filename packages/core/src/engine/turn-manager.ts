@@ -2,29 +2,66 @@ import type { GameState } from '../types/game-state.js';
 import type { PlayerId } from '../types/player.js';
 
 /**
- * Advances turn to next player
+ * Advances turn to next active player (skips finished players)
  */
 export function advanceTurn(state: GameState): GameState {
-  const currentPlayerIndex = state.currentPlayerIndex;
-  const nextIndex = (currentPlayerIndex + 1) % state.players.length;
+  if (state.activePlayerIds.length === 0) {
+    return state; // No active players
+  }
+
+  const currentPlayerId = getCurrentPlayerId(state);
+  const currentActiveIndex = state.activePlayerIds.indexOf(currentPlayerId);
+  
+  if (currentActiveIndex === -1) {
+    // Current player is not active, find first active player
+    const firstActivePlayer = state.players.find(p => state.activePlayerIds.includes(p.id));
+    if (!firstActivePlayer) {
+      return state;
+    }
+    const newIndex = state.players.findIndex(p => p.id === firstActivePlayer.id);
+    return {
+      ...state,
+      currentPlayerIndex: newIndex,
+    };
+  }
+
+  // Find next active player
+  const nextActiveIndex = (currentActiveIndex + 1) % state.activePlayerIds.length;
+  const nextActivePlayerId = state.activePlayerIds[nextActiveIndex];
+  const nextPlayerIndex = state.players.findIndex(p => p.id === nextActivePlayerId);
+  
+  if (nextPlayerIndex === -1) {
+    throw new Error('Next active player not found in players array');
+  }
+
+  const wasNewRound = nextPlayerIndex < state.currentPlayerIndex || 
+                      (nextPlayerIndex === 0 && state.currentPlayerIndex > 0);
 
   return {
     ...state,
-    currentPlayerIndex: nextIndex,
-    roundNumber: nextIndex === 0 ? state.roundNumber + 1 : state.roundNumber,
+    currentPlayerIndex: nextPlayerIndex,
+    roundNumber: wasNewRound ? state.roundNumber + 1 : state.roundNumber,
   };
 }
 
 /**
- * Get the next player ID in rotation
+ * Get the next active player ID in rotation
  */
 export function getNextPlayerId(state: GameState): PlayerId {
-  const nextIndex = (state.currentPlayerIndex + 1) % state.players.length;
-  const nextPlayer = state.players[nextIndex];
-  if (!nextPlayer) {
-    throw new Error('Invalid next player index');
+  if (state.activePlayerIds.length === 0) {
+    throw new Error('No active players');
   }
-  return nextPlayer.id;
+
+  const currentPlayerId = getCurrentPlayerId(state);
+  const currentActiveIndex = state.activePlayerIds.indexOf(currentPlayerId);
+  
+  if (currentActiveIndex === -1) {
+    // Current player is not active, return first active player
+    return state.activePlayerIds[0];
+  }
+
+  const nextActiveIndex = (currentActiveIndex + 1) % state.activePlayerIds.length;
+  return state.activePlayerIds[nextActiveIndex];
 }
 
 /**

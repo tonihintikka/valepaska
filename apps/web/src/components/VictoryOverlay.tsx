@@ -106,9 +106,19 @@ export function VictoryOverlay({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-4xl font-bold text-white mb-8"
+            className="text-4xl font-bold text-white mb-4"
           >
             VOITTI!
+          </motion.div>
+          
+          {/* Game continues text */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-lg text-slate-300 mb-4"
+          >
+            Peli jatkuu - kuka jää Valepaskaksi?
           </motion.div>
 
           {/* Avatar if provided */}
@@ -128,9 +138,9 @@ export function VictoryOverlay({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="text-slate-400 text-sm mt-8"
+            className="text-slate-400 text-sm mt-4"
           >
-            Klikkaa tai odota {duration} sekuntia...
+            Klikkaa jatkaaksesi...
           </motion.p>
         </motion.div>
       </motion.div>

@@ -53,9 +53,10 @@ export class BotRunner {
     if (!state.lastPlay) return false;
 
     const accusedId = state.lastPlay.playerId;
-    for (const player of state.players) {
-      if (player.id === accusedId) continue; // Can't challenge own play
-      if (bots.has(player.id) && !this.challengeDecisions.has(player.id)) {
+    // Only check active players (finished players can't challenge)
+    for (const playerId of state.activePlayerIds) {
+      if (playerId === accusedId) continue; // Can't challenge own play
+      if (bots.has(playerId) && !this.challengeDecisions.has(playerId)) {
         return false;
       }
     }
@@ -72,14 +73,15 @@ export class BotRunner {
   ): void {
     if (!state.lastPlay) return;
 
-    for (const player of state.players) {
-      if (player.id === state.lastPlay!.playerId) {
+    // Only collect from active players (finished players can't challenge)
+    for (const playerId of state.activePlayerIds) {
+      if (playerId === state.lastPlay!.playerId) {
         continue; // Can't challenge own play
       }
 
-      const bot = bots.get(player.id);
-      if (bot && !this.challengeDecisions.has(player.id)) {
-        const observation = getObservation(player.id);
+      const bot = bots.get(playerId);
+      if (bot && !this.challengeDecisions.has(playerId)) {
+        const observation = getObservation(playerId);
         // claimRank is string in LastPlay, but shouldChallenge expects Rank
         // This is safe because claimRank should always be a valid Rank
         const shouldChallenge = bot.shouldChallenge(
@@ -87,7 +89,7 @@ export class BotRunner {
           state.lastPlay!.claimRank as import('../types/card.js').Rank,
           state.lastPlay!.claimCount
         );
-        this.recordChallengeDecision(player.id, shouldChallenge);
+        this.recordChallengeDecision(playerId, shouldChallenge);
       }
     }
   }

@@ -11,6 +11,7 @@ export function GameTable() {
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const humanPlayerId = useGameStore((state) => state.humanPlayerId);
   const isSpectator = useGameStore((state) => state.isSpectator);
+  const standings = useGameStore((state) => state.standings);
 
   if (!observation) return null;
 
@@ -100,6 +101,10 @@ export function GameTable() {
           : (observation.otherHandSizes.get(player.id) ?? 0);
 
         const isCurrentPlayer = observation.currentPlayerId === player.id;
+        
+        // Check if player has finished
+        const standing = standings.find(s => s.playerId === player.id);
+        const isFinished = !!standing;
 
         // Get actual cards in spectator mode
         const cards = isSpectator && gameState
@@ -113,9 +118,11 @@ export function GameTable() {
             name={player.name}
             avatar={player.avatar}
             handSize={handSize}
-            isCurrentPlayer={isCurrentPlayer}
+            isCurrentPlayer={isCurrentPlayer && !isFinished}
             difficulty={player.botDifficulty}
             cards={cards}
+            standing={standing}
+            isFinished={isFinished}
           />
         );
       })}
@@ -142,9 +149,11 @@ interface OpponentSlotProps {
   isCurrentPlayer: boolean;
   difficulty?: string;
   cards?: readonly Card[]; // Actual cards (spectator mode only)
+  standing?: { position: number; score: number }; // Player standing if finished
+  isFinished: boolean;
 }
 
-function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, difficulty, cards }: OpponentSlotProps) {
+function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, difficulty, cards, standing, isFinished }: OpponentSlotProps) {
   const positionClasses: Record<PlayerPosition, string> = {
     bottom: 'bottom-4 left-1/2 -translate-x-1/2',
     top: 'top-4 left-1/2 -translate-x-1/2',
@@ -170,15 +179,37 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
         transition={{ duration: 1.5, repeat: isCurrentPlayer ? Infinity : 0 }}
         className={`glass rounded-xl p-3 ${
           isCurrentPlayer ? 'ring-2 ring-accent-gold shadow-glow-gold' : ''
+        } ${
+          isFinished ? 'opacity-60' : ''
         }`}
       >
         {/* Player info */}
         <div className="flex items-center gap-2 mb-2">
           <span className="text-2xl">{avatar ?? '🤖'}</span>
-          <div>
-            <div className="text-sm font-medium text-white">{name}</div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-medium text-white">{name}</div>
+              {isFinished && standing && (
+                <span className={`text-xs font-bold ${
+                  standing.position === 1 ? 'text-accent-gold' : 
+                  standing.position === 2 ? 'text-slate-300' : 
+                  standing.position === 3 ? 'text-amber-600' : 
+                  'text-slate-500'
+                }`}>
+                  {standing.position === 1 ? '🏆' : 
+                   standing.position === 2 ? '🥈' : 
+                   standing.position === 3 ? '🥉' : 
+                   `${standing.position}.`}
+                </span>
+              )}
+            </div>
             {difficulty && (
               <div className="text-xs text-slate-400">{difficulty}</div>
+            )}
+            {isFinished && standing && (
+              <div className="text-xs text-accent-gold font-medium">
+                {standing.score}p
+              </div>
             )}
           </div>
         </div>

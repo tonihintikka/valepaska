@@ -1,5 +1,6 @@
 import type { Card, CardId, Rank } from './card.js';
 import type { PlayerId } from './player.js';
+import type { PlayerStanding } from './game-state.js';
 
 /**
  * Game event types
@@ -14,7 +15,8 @@ export type GameEventType =
   | 'PILE_BURNED'
   | 'CARDS_DRAWN'
   | 'TURN_ADVANCED'
-  | 'PLAYER_WON'
+  | 'PLAYER_FINISHED'
+  | 'PLAYER_WON' // Deprecated: use PLAYER_FINISHED
   | 'GAME_OVER';
 
 /**
@@ -121,7 +123,18 @@ export interface TurnAdvancedEvent extends BaseEvent {
 }
 
 /**
- * Player won event
+ * Player finished event (emptied hand, got a position)
+ */
+export interface PlayerFinishedEvent extends BaseEvent {
+  readonly type: 'PLAYER_FINISHED';
+  readonly playerId: PlayerId;
+  readonly position: number; // 1 = 1st place, 2 = 2nd, etc.
+  readonly score: number;
+  readonly finishedAtRound: number;
+}
+
+/**
+ * Player won event (deprecated: use PLAYER_FINISHED with position 1)
  */
 export interface PlayerWonEvent extends BaseEvent {
   readonly type: 'PLAYER_WON';
@@ -134,7 +147,8 @@ export interface PlayerWonEvent extends BaseEvent {
  */
 export interface GameOverEvent extends BaseEvent {
   readonly type: 'GAME_OVER';
-  readonly winnerId: PlayerId;
+  readonly winnerId: PlayerId; // Deprecated: use standings[0].playerId
+  readonly standings: readonly PlayerStanding[];
   readonly totalRounds: number;
 }
 
@@ -151,6 +165,7 @@ export type GameEvent =
   | PileBurnedEvent
   | CardsDrawnEvent
   | TurnAdvancedEvent
+  | PlayerFinishedEvent
   | PlayerWonEvent
   | GameOverEvent;
 

@@ -80,6 +80,8 @@ export const useGameStore = create<GameStore>()(
           const difficulty = player.botDifficulty ?? 'Normal';
           const bot = new RuleBot(player.id, difficulty, config.seed);
           bots.set(player.id, bot);
+          // Register bot with engine so tick() can use it
+          engine.registerBot(player.id, bot);
         }
       }
       
@@ -104,6 +106,7 @@ export const useGameStore = create<GameStore>()(
         observation,
         events: [],
         winnerId: null,
+        standings: [],
         bots,
         selectedCards: [],
         selectedRank: null,
@@ -128,6 +131,7 @@ export const useGameStore = create<GameStore>()(
         gameState: null,
         events: [],
         winnerId: null,
+        standings: [],
         bots: new Map(),
         selectedCards: [],
         selectedRank: null,
@@ -268,11 +272,14 @@ export const useGameStore = create<GameStore>()(
     },
     
     processBotTurn: () => {
-      const { engine, humanPlayerId, bots, uiPhase, isSpectator } = get();
+      const { engine, humanPlayerId, uiPhase, isSpectator } = get();
       if (!engine || uiPhase !== 'playing') return;
       
       const state = engine.getState();
-      if (state.phase === 'GAME_OVER') return;
+      if (state.phase === 'GAME_OVER') {
+        set({ uiPhase: 'gameOver' });
+        return;
+      }
       
       const currentPlayer = state.players[state.currentPlayerIndex];
       if (!currentPlayer) return;
@@ -284,18 +291,8 @@ export const useGameStore = create<GameStore>()(
         return;
       }
       
-      // If waiting for challenges
-      if (state.phase === 'WAITING_FOR_CHALLENGES') {
-        // In spectator mode, process challenges immediately (fast)
-        if (isSpectator) {
-          get().processBotChallenges();
-          engine.processChallenges();
-          get().updateObservation();
-          const { gameSpeed } = get();
-          setTimeout(() => get().processBotTurn(), Math.max(50, 150 / gameSpeed));
-          return;
-        }
-        
+      // If waiting for challenges (for human player only)
+      if (state.phase === 'WAITING_FOR_CHALLENGES' && !isSpectator) {
         // For human player, show quick challenge window
         set({ showChallengeModal: true, challengeTimeLeft: 2 });
         
@@ -333,29 +330,27 @@ export const useGameStore = create<GameStore>()(
         return;
       }
       
-      // Get the bot for current player
-      const bot = bots.get(currentPlayerId);
-      if (!bot) return;
-      
-      set({ isProcessingBots: true });
-      
-      // Get bot's observation
-      const botObs = engine.getObservation(currentPlayerId);
-      
-      // Bot chooses a move
-      const move = bot.chooseMove(botObs);
-      
-      // Apply the move with a short delay for animation
+      // Use engine.tick() for bot turns - it handles everything correctly
       const { gameSpeed } = get();
       setTimeout(() => {
-        engine.submitMove(currentPlayerId, move);
-        get().updateObservation();
-        set({ isProcessingBots: false });
+        const { engine: eng, uiPhase: phase } = get();
+        if (!eng || phase !== 'playing') return;
         
-        // Continue with challenge window
-        const { gameSpeed: currentSpeed } = get();
-        setTimeout(() => get().processBotTurn(), Math.max(50, 100 / currentSpeed));
-      }, Math.max(50, 300 / gameSpeed));
+        const currentState = eng.getState();
+        if (currentState.phase === 'GAME_OVER') {
+          set({ uiPhase: 'gameOver' });
+          return;
+        }
+        
+        // Use tick() which properly handles active players and challenges
+        const didSomething = eng.tick();
+        get().updateObservation();
+        
+        if (didSomething && currentState.phase !== 'GAME_OVER') {
+          const { gameSpeed: currentSpeed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 100 / currentSpeed));
+        }
+      }, Math.max(50, 150 / gameSpeed));
     },
     
     processBotChallenges: () => {
@@ -368,10 +363,11 @@ export const useGameStore = create<GameStore>()(
       // Who made the last play? They can't challenge themselves
       const lastPlayerId = state.lastPlay?.playerId;
       
-      // All bots submit their challenge decisions (except the one who played)
+      // All bots submit their challenge decisions (except the one who played, and finished players)
       for (const [botId, bot] of bots) {
         if (botId === humanPlayerId) continue;
         if (botId === lastPlayerId) continue; // Can't challenge own play
+        if (!state.activePlayerIds.includes(botId)) continue; // Finished players can't challenge
         
         const botObs = engine.getObservation(botId);
         const lastClaim = botObs.lastClaim;
@@ -387,16 +383,41 @@ export const useGameStore = create<GameStore>()(
       const { isSpectator } = get();
       get().addEvent(event);
       
-      if (event.type === 'PLAYER_WON') {
-        // Show victory overlay first, then transition to game over
-        get().setShowVictoryOverlay(true);
-        get().setPendingWinnerId(event.winnerId);
-        get().setWinnerId(event.winnerId);
-        set({ 
-          showChallengeModal: false,
-          activeChallenge: null,
-          challengeReveal: null,
-        });
+      if (event.type === 'PLAYER_FINISHED') {
+        // Update standings when a player finishes
+        const { standings } = get();
+        const newStanding = {
+          playerId: event.playerId,
+          position: event.position,
+          score: event.score,
+          finishedAtRound: event.finishedAtRound,
+        };
+        get().setStandings([...standings, newStanding]);
+        
+        // Show victory overlay for first place (winner)
+        if (event.position === 1) {
+          get().setShowVictoryOverlay(true);
+          get().setPendingWinnerId(event.playerId);
+          get().setWinnerId(event.playerId);
+          set({ 
+            showChallengeModal: false,
+            activeChallenge: null,
+            challengeReveal: null,
+          });
+        }
+      }
+      
+      // PLAYER_WON is deprecated, handled by PLAYER_FINISHED + GAME_OVER
+      
+      if (event.type === 'GAME_OVER') {
+        // Update standings from final event
+        if (event.standings && event.standings.length > 0) {
+          get().setStandings([...event.standings]);
+        }
+        get().setWinnerId(event.winnerId || null);
+        
+        // NOW transition to game over screen (all players finished)
+        set({ uiPhase: 'gameOver' });
       }
       
       // Show challenge indicator in spectator mode
@@ -441,15 +462,18 @@ export const useGameStore = create<GameStore>()(
       get().updateObservation();
     },
     
-    // Override dismissVictoryOverlay to also set uiPhase
+    // Override dismissVictoryOverlay - game continues after first player wins!
     dismissVictoryOverlay: () => {
-      get().dismissVictoryOverlay(() => {
-        const { pendingWinnerId } = get();
-        set({
-          uiPhase: 'gameOver',
-          winnerId: pendingWinnerId,
-        });
+      const { pendingWinnerId, gameSpeed } = get();
+      set({ 
+        showVictoryOverlay: false,
+        pendingWinnerId: null,
+        winnerId: pendingWinnerId,
+        // DO NOT set uiPhase to gameOver here - game continues until GAME_OVER event
       });
+      
+      // Continue bot processing after victory overlay
+      setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
   }))
 );

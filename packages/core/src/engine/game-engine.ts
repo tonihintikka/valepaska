@@ -17,8 +17,9 @@ import {
   selectChallenger,
 } from '../rules/challenge-rules.js';
 import {
-  checkWinCondition,
+  checkFinishCondition,
   validatePlayerCount,
+  createPlayerStanding,
 } from '../rules/game-rules.js';
 import { GameEventEmitter } from './event-emitter.js';
 import { createObservation } from './observation-factory.js';
@@ -73,6 +74,8 @@ export class GameEngine {
       seed,
       roundNumber: 0,
       winnerId: null,
+      standings: [],
+      activePlayerIds: players.map(p => p.id),
     };
 
     // Deal cards
@@ -341,9 +344,9 @@ export class GameEngine {
       this.eventEmitter.emit('PILE_BURNED', burnData);
     }
 
-    // Check for win
+    // Check if accused finished (if they continue, they might have emptied hand)
     if (result.accusedContinues) {
-      this.checkForWin(accusedId);
+      this.checkForFinish(accusedId, false); // Challenge failed, so not challenged successfully
     }
 
     if (this.state.phase === 'GAME_OVER') {
@@ -373,16 +376,16 @@ export class GameEngine {
       const burnData = getBurnEventData(this.state, result.burnReason as BurnReason);
       this.eventEmitter.emit('PILE_BURNED', burnData);
 
-      // Check for win (player who burned might have emptied their hand)
-      this.checkForWin(playerId);
+      // Check if player finished (player who burned might have emptied their hand)
+      this.checkForFinish(playerId, false); // No challenge, so not challenged successfully
 
       if (this.state.phase !== 'GAME_OVER') {
         // Replenish hands
         this.replenishAllHands();
       }
     } else {
-      // Check for win
-      this.checkForWin(playerId);
+      // Check if player finished
+      this.checkForFinish(playerId, false); // No challenge, so not challenged successfully
 
       if (this.state.phase !== 'GAME_OVER') {
         // Advance turn
@@ -425,47 +428,133 @@ export class GameEngine {
   }
 
   /**
-   * Check for win condition
+   * Check if player has finished (emptied hand)
    */
-  private checkForWin(playerId: PlayerId): void {
+  private checkForFinish(playerId: PlayerId, lastPlayWasChallengedSuccessfully: boolean): void {
     const hand = this.state.hands.get(playerId);
     if (!hand) return;
 
-    const hasWon = checkWinCondition(
+    // Skip if player already finished
+    if (!this.state.activePlayerIds.includes(playerId)) {
+      return;
+    }
+
+    const hasFinished = checkFinishCondition(
       hand.length,
       this.state.drawPile.length,
-      false // Already handled challenge
+      lastPlayWasChallengedSuccessfully
     );
 
-    if (hasWon) {
-      this.declareWinner(playerId);
+    if (hasFinished) {
+      this.handlePlayerFinished(playerId);
     }
   }
 
   /**
-   * Declare a winner
+   * Handle player finishing (emptying hand)
    */
-  private declareWinner(winnerId: PlayerId): void {
-    const finalHandSizes: Record<PlayerId, number> = {};
-    for (const [playerId, hand] of this.state.hands) {
-      finalHandSizes[playerId] = hand.length;
-    }
+  private handlePlayerFinished(playerId: PlayerId): void {
+    // Calculate position (1st place, 2nd place, etc.)
+    const position = this.state.standings.length + 1;
+    const totalPlayers = this.state.players.length;
+    
+    // TODO: Track perfect game (no cards drawn) - for now, assume false
+    const perfectGame = false;
+    
+    const standing = createPlayerStanding(
+      playerId,
+      position,
+      totalPlayers,
+      this.state.roundNumber,
+      perfectGame
+    );
+
+    // Update state: add to standings, remove from active players
+    const newStandings = [...this.state.standings, standing];
+    const newActivePlayerIds = this.state.activePlayerIds.filter(id => id !== playerId);
 
     this.state = {
       ...this.state,
-      phase: 'GAME_OVER',
-      winnerId,
+      standings: newStandings,
+      activePlayerIds: newActivePlayerIds,
+      // Set winnerId for backward compatibility (first finished player)
+      winnerId: position === 1 ? playerId : this.state.winnerId,
     };
 
-    this.eventEmitter.emit('PLAYER_WON', {
-      winnerId,
-      finalHandSizes,
+    // Emit PLAYER_FINISHED event
+    this.eventEmitter.emit('PLAYER_FINISHED', {
+      playerId,
+      position,
+      score: standing.score,
+      finishedAtRound: this.state.roundNumber,
     });
 
+    // Check if game should end (only one active player left = loser)
+    if (newActivePlayerIds.length <= 1) {
+      this.endGame(newStandings);
+    }
+  }
+
+  /**
+   * End the game (only loser remains or all finished)
+   */
+  private endGame(standings: readonly PlayerStanding[]): void {
+    // If there's one active player left, they are the loser
+    if (this.state.activePlayerIds.length === 1) {
+      const loserId = this.state.activePlayerIds[0];
+      const totalPlayers = this.state.players.length;
+      const loserStanding = createPlayerStanding(
+        loserId,
+        totalPlayers, // Last place
+        totalPlayers,
+        this.state.roundNumber,
+        false
+      );
+      const finalStandings = [...standings, loserStanding];
+      
+      this.state = {
+        ...this.state,
+        phase: 'GAME_OVER',
+        standings: finalStandings,
+        activePlayerIds: [],
+        winnerId: finalStandings[0]?.playerId ?? null,
+      };
+
+      // Emit PLAYER_FINISHED for the loser
+      this.eventEmitter.emit('PLAYER_FINISHED', {
+        playerId: loserId,
+        position: totalPlayers,
+        score: loserStanding.score,
+        finishedAtRound: this.state.roundNumber,
+      });
+    } else {
+      // All players finished (rare draw scenario)
+      this.state = {
+        ...this.state,
+        phase: 'GAME_OVER',
+        activePlayerIds: [],
+        winnerId: standings[0]?.playerId ?? null,
+      };
+    }
+
+    // Emit GAME_OVER event
     this.eventEmitter.emit('GAME_OVER', {
-      winnerId,
+      winnerId: this.state.winnerId ?? '',
+      standings: this.state.standings,
       totalRounds: this.state.roundNumber,
     });
+
+    // Emit backward-compatible PLAYER_WON event
+    if (this.state.winnerId) {
+      const finalHandSizes: Record<PlayerId, number> = {};
+      for (const [playerId, hand] of this.state.hands) {
+        finalHandSizes[playerId] = hand.length;
+      }
+      this.eventEmitter.emit('PLAYER_WON', {
+        winnerId: this.state.winnerId,
+        finalHandSizes,
+      });
+    }
   }
 
   /**
@@ -491,6 +580,21 @@ export class GameEngine {
 
     if (this.state.phase === 'WAITING_FOR_PLAY') {
       const currentPlayer = this.getCurrentPlayer();
+      
+      // Skip finished players (advance turn)
+      if (!this.state.activePlayerIds.includes(currentPlayer.id)) {
+        const previousPlayerId = currentPlayer.id;
+        this.state = advanceTurn(this.state);
+        const newCurrentPlayer = this.getCurrentPlayer();
+        
+        this.eventEmitter.emit('TURN_ADVANCED', {
+          previousPlayerId,
+          currentPlayerId: newCurrentPlayer.id,
+        });
+        
+        return true; // Continue processing
+      }
+      
       const bot = this.bots.get(currentPlayer.id);
 
       if (bot) {
