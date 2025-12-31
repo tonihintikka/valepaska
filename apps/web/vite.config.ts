@@ -11,6 +11,10 @@ export default defineConfig({
       '@valepaska/bots': resolve(__dirname, '../../packages/bots/src/index.ts'),
     },
   },
+  build: {
+    outDir: resolve(__dirname, '../../dist'),
+    emptyOutDir: true,
+  },
   server: {
     port: 3000,
   },
