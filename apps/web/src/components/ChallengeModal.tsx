@@ -13,8 +13,8 @@ export function ChallengeModal() {
   if (!observation || !observation.lastClaim) return null;
 
   const lastClaim = observation.lastClaim;
-  const claimingPlayer = playerConfigs.find((p) => p.id === lastClaim.byPlayer);
-  const isOwnClaim = lastClaim.byPlayer === humanPlayerId;
+  const claimingPlayer = playerConfigs.find((p) => p.id === lastClaim.playerId);
+  const isOwnClaim = lastClaim.playerId === humanPlayerId;
 
   return (
     <motion.div

@@ -57,11 +57,11 @@ export function getNextPlayerId(state: GameState): PlayerId {
   
   if (currentActiveIndex === -1) {
     // Current player is not active, return first active player
-    return state.activePlayerIds[0];
+    return state.activePlayerIds[0]!;
   }
 
   const nextActiveIndex = (currentActiveIndex + 1) % state.activePlayerIds.length;
-  return state.activePlayerIds[nextActiveIndex];
+  return state.activePlayerIds[nextActiveIndex]!;
 }
 
 /**

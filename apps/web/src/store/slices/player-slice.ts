@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand';
-import type { PlayerConfig } from '../../../types';
+import type { PlayerConfig } from '../../types';
 
 export interface PlayerSlice {
   humanPlayerId: string | null;
@@ -15,7 +15,7 @@ export const createPlayerSlice: StateCreator<
   [],
   [],
   PlayerSlice
-> = (set) => ({
+> = (set, _get, _store) => ({
   // Initial state
   humanPlayerId: null,
   playerConfigs: [],

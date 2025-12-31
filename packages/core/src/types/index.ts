@@ -66,6 +66,7 @@ export {
   type GameConfig,
   type LastPlay,
   type GameState,
+  type PlayerStanding,
   DEFAULT_GAME_CONFIG,
   createInitialGameState,
   getCurrentPlayer,

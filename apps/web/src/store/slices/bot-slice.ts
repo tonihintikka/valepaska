@@ -16,7 +16,7 @@ export const createBotSlice: StateCreator<
   [],
   [],
   BotSlice
-> = (set) => ({
+> = (set, _get, _store) => ({
   // Initial state
   bots: new Map(),
   gameSpeed: 1,

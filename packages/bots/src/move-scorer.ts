@@ -40,7 +40,7 @@ export function scoreMove(
   
   // Strategic: reaching 7 enables face cards and eventual A burn
   // Encourage progression toward face card territory
-  const lastRank = observation.lastClaimRank;
+  const lastRank = observation.lastClaim?.rank;
   if (lastRank && ['5', '6'].includes(lastRank) && move.claimRank === '7') {
     score += 2; // Reaching 7 opens up face cards → eventual A burn
   }

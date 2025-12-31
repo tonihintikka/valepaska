@@ -62,7 +62,7 @@ export function replenishAllHands(
     }
     return {
       hands: mutableHands,
-      drawPile: state.drawPile,
+      drawPile: [...state.drawPile],
       drawnCounts: new Map(),
     };
   }

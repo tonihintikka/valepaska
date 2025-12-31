@@ -68,7 +68,7 @@ export function GameTable() {
               {lastClaim.count}× {lastClaim.rank}
             </div>
             <div className="text-xs text-slate-400">
-              {playerConfigs.find((p) => p.id === lastClaim.byPlayer)?.name ?? 'Tuntematon'}
+              {playerConfigs.find((p) => p.id === lastClaim.playerId)?.name ?? 'Tuntematon'}
             </div>
           </motion.div>
         )}

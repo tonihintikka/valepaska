@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { GameEngine, GameState, PlayerObservation, PlayerStanding } from '@valepaska/core';
-import type { UIPhase } from '../../../types';
+import type { UIPhase } from '../../types';
 
 export interface GameStateSlice {
   // Core state
@@ -25,7 +25,7 @@ export const createGameStateSlice: StateCreator<
   [],
   [],
   GameStateSlice
-> = (set) => ({
+> = (set, _get, _store) => ({
   // Initial state
   uiPhase: 'start',
   engine: null,
