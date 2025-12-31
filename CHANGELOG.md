@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Logo Component (2025-12-31)
+
+Added reusable `Logo` component that displays across all game screens:
+
+- **StartScreen**: Gold variant, medium size with title
+- **GameScreen**: Light variant, small card icon in top-left corner
+- **GameOverScreen**: Dark variant, small size with title at top
+
+**Features:**
+- Three sizes: `sm`, `md`, `lg`
+- Three color variants: `gold`, `light`, `dark`
+- Optional title display
+- Animated entrance with Framer Motion
+- Hover effects and gold glow
+- Joker emoji with corner "V" decorations
+
+**Files Added:**
+- `apps/web/src/components/Logo.tsx`
+- `docs/screenshot.png` (README screenshot)
+
+---
+
+### Fixed
+
+#### Bot Turn Progression (2025-12-31)
+
+Fixed bug where game would not progress between bot turns.
+
+**Problem:** Bots were created in the store's `bots` Map but not registered with the game engine. When `tick()` was called, it looked for bots in the engine's internal `this.bots` Map which was empty.
+
+**Solution:** Added `engine.registerBot(player.id, bot)` call after creating each bot in `startGame()`.
+
+**Files Changed:**
+- `apps/web/src/store/game-store.ts`
+
+---
+
+#### Vercel Deployment (2025-12-31)
+
+Fixed Vercel deployment error "No Output Directory named 'dist' found".
+
+**Problem:** Monorepo structure with pnpm workspaces caused output directory mismatch.
+
+**Solution:** 
+- Added `vercel.json` to `apps/web/` directory
+- Build command navigates to root for pnpm workspace support
+- Root Directory in Vercel set to `apps/web`
+
+**Files Added:**
+- `apps/web/vercel.json`
+
+---
+
 ### Refactored
 
 #### `game-store.ts` Modularization (2025-01-27)
