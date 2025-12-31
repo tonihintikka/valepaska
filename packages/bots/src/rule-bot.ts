@@ -24,9 +24,9 @@ export class RuleBot implements Bot {
   private readonly memory: BotMemory;
   private readonly rng: SeededRng;
 
-  constructor(playerId: PlayerId, difficulty: BotDifficulty, seed?: number) {
+  constructor(playerId: PlayerId, difficulty: BotDifficulty, seed?: number, customConfig?: BotConfig) {
     this.playerId = playerId;
-    this.config = BOT_PRESETS[difficulty];
+    this.config = customConfig ?? BOT_PRESETS[difficulty];
     this.memory = new BotMemory(this.config.memoryLevel);
     this.rng = createRng(seed ?? Date.now());
   }
@@ -35,9 +35,7 @@ export class RuleBot implements Bot {
    * Create a bot with custom config
    */
   static withConfig(playerId: PlayerId, config: BotConfig, seed?: number): RuleBot {
-    const bot = new RuleBot(playerId, 'Normal', seed);
-    (bot as { config: BotConfig }).config = config;
-    return bot;
+    return new RuleBot(playerId, 'Normal', seed, config);
   }
 
   /**

@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
-import type { GameEvent } from '@valepaska/core';
+import type { GameEvent, Rank } from '@valepaska/core';
 import { RANK_DISPLAY } from '../types';
 
 export function DebugPanel() {
   const engine = useGameStore((state) => state.engine);
-  const observation = useGameStore((state) => state.observation);
   const events = useGameStore((state) => state.events);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
   const humanPlayerId = useGameStore((state) => state.humanPlayerId);
@@ -19,12 +18,15 @@ export function DebugPanel() {
   const getPlayerName = (id: string) => 
     playerConfigs.find(p => p.id === id)?.name ?? id;
 
+  const displayRank = (rank: Rank | string): string =>
+    RANK_DISPLAY[rank as keyof typeof RANK_DISPLAY] ?? rank;
+
   const formatEvent = (event: GameEvent): string => {
     switch (event.type) {
       case 'GAME_STARTED':
         return `🎮 Peli alkoi (${event.playerIds?.length ?? 0} pelaajaa)`;
       case 'PLAY_MADE':
-        return `🃏 ${getPlayerName(event.playerId)} pelasi ${event.claimCount}× ${RANK_DISPLAY[event.claimRank]}`;
+        return `🃏 ${getPlayerName(event.playerId)} pelasi ${event.claimCount}× ${displayRank(event.claimRank)}`;
       case 'CHALLENGE_DECLARED':
         return `⚡ ${getPlayerName(event.challengerId)} haastoi ${getPlayerName(event.accusedId)}`;
       case 'CHALLENGE_RESOLVED':
@@ -32,11 +34,11 @@ export function DebugPanel() {
       case 'PILE_BURNED':
         return `🔥 KAATO: ${event.reason}`;
       case 'CARDS_DRAWN':
-        return `📥 ${getPlayerName(event.playerId)} nosti ${event.count} korttia`;
+        return `📥 ${getPlayerName(event.playerId)} nosti ${event.cardCount} korttia`;
       case 'TURN_ADVANCED':
-        return `➡️ Vuoro: ${getPlayerName(event.nextPlayerId)}`;
+        return `➡️ Vuoro: ${getPlayerName(event.currentPlayerId)}`;
       case 'PLAYER_WON':
-        return `🏆 ${getPlayerName(event.playerId)} VOITTI!`;
+        return `🏆 ${getPlayerName(event.winnerId)} VOITTI!`;
       default:
         return event.type;
     }
@@ -126,7 +128,7 @@ export function DebugPanel() {
               <span className="font-medium">{getPlayerName(state.lastPlay.playerId)}</span>
               {' pelasi '}
               <span className="text-accent-gold font-bold">
-                {state.lastPlay.claimCount}× {RANK_DISPLAY[state.lastPlay.claimRank]}
+                {state.lastPlay.claimCount}× {displayRank(state.lastPlay.claimRank)}
               </span>
             </div>
             <div className="text-xs text-slate-400 mt-1">

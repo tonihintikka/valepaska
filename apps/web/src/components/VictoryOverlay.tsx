@@ -1,9 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
-import type { PlayerId } from '@valepaska/core';
 
 interface VictoryOverlayProps {
-  winnerId: PlayerId;
   winnerName: string;
   winnerAvatar?: string;
   onComplete: () => void;
@@ -15,7 +13,6 @@ interface VictoryOverlayProps {
  * Displays prominently before transitioning to game over screen
  */
 export function VictoryOverlay({
-  winnerId,
   winnerName,
   winnerAvatar,
   onComplete,

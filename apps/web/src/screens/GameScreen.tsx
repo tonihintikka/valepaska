@@ -109,7 +109,6 @@ export function GameScreen() {
             wasLie={challengeReveal.wasLie}
             claimedRank={challengeReveal.claimedRank}
             claimedCount={challengeReveal.claimedCount}
-            challengerName={challenger.name}
             accusedName={accused.name}
             receiverName={receiver.name}
             onComplete={dismissChallengeReveal}
@@ -124,7 +123,6 @@ export function GameScreen() {
         
         return (
           <VictoryOverlay
-            winnerId={pendingWinnerId}
             winnerName={winner.name}
             winnerAvatar={winner.avatar}
             onComplete={dismissVictoryOverlay}

@@ -155,25 +155,6 @@ function generateBurnBluffs(
 }
 
 /**
- * Find cards that can't be played honestly
- */
-function findBadCards(
-  observation: PlayerObservation,
-  handByRank: Map<Rank, Card[]>
-): Card[] {
-  const validRanks = new Set(observation.validClaimRanks);
-  const badCards: Card[] = [];
-
-  for (const [rank, cards] of handByRank) {
-    if (!validRanks.has(rank)) {
-      badCards.push(...cards);
-    }
-  }
-
-  return badCards;
-}
-
-/**
  * Select the best move from candidates
  */
 export function selectBestMove(candidates: CandidateMove[]): CandidateMove | null {

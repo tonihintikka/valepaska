@@ -21,6 +21,7 @@ import {
   validatePlayerCount,
   createPlayerStanding,
 } from '../rules/game-rules.js';
+import type { PlayerStanding } from '../types/game-state.js';
 import { GameEventEmitter } from './event-emitter.js';
 import { createObservation } from './observation-factory.js';
 import { dealInitialCards, replenishAllHands } from './hand-manager.js';
@@ -501,7 +502,7 @@ export class GameEngine {
   private endGame(standings: readonly PlayerStanding[]): void {
     // If there's one active player left, they are the loser
     if (this.state.activePlayerIds.length === 1) {
-      const loserId = this.state.activePlayerIds[0];
+      const loserId = this.state.activePlayerIds[0]!;
       const totalPlayers = this.state.players.length;
       const loserStanding = createPlayerStanding(
         loserId,

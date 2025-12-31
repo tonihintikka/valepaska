@@ -14,7 +14,7 @@ export const createEventSlice: StateCreator<
   [],
   [],
   EventSlice
-> = (set, get) => ({
+> = (set, get, _store) => ({
   // Initial state
   events: [],
   

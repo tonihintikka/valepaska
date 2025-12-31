@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Card as CardType, PlayerId, Rank } from '@valepaska/core';
+import type { Card as CardType, Rank } from '@valepaska/core';
 import { RANK_DISPLAY, SUIT_SYMBOLS, SUIT_COLORS } from '../types';
 
 interface ChallengeRevealOverlayProps {
@@ -7,7 +7,6 @@ interface ChallengeRevealOverlayProps {
   wasLie: boolean;
   claimedRank: Rank;
   claimedCount: number;
-  challengerName: string;
   accusedName: string;
   receiverName: string;
   onComplete?: () => void;
@@ -22,7 +21,6 @@ export function ChallengeRevealOverlay({
   wasLie,
   claimedRank,
   claimedCount,
-  challengerName,
   accusedName,
   receiverName,
   onComplete,

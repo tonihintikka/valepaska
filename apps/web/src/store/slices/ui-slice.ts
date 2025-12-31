@@ -51,7 +51,7 @@ export const createUISlice: StateCreator<
   [],
   [],
   UISlice
-> = (set, get) => ({
+> = (set, get, _store) => ({
   // Initial state
   selectedCards: [],
   selectedRank: null,

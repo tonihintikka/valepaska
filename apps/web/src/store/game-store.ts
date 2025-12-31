@@ -1,20 +1,16 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { 
-  GameEngine, 
-  type PlayerId, 
-  type Rank, 
-  type GameEvent, 
-  type PlayerObservation,
+import {
+  GameEngine,
+  type PlayerId,
+  type GameEvent,
   type Player,
-  type GameState,
-  type Card,
   createPlayMove,
   createHumanPlayer,
   createBotPlayer,
 } from '@valepaska/core';
 import { RuleBot } from '@valepaska/bots';
-import type { UIPhase, PlayerConfig, GameConfig } from '../types';
+import type { GameConfig } from '../types';
 import { createGameStateSlice, type GameStateSlice } from './slices/game-state-slice.js';
 import { createPlayerSlice, type PlayerSlice } from './slices/player-slice.js';
 import { createUISlice, type UISlice } from './slices/ui-slice.js';
@@ -47,14 +43,14 @@ export interface GameStore extends
 }
 
 export const useGameStore = create<GameStore>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set, get, api) => ({
     // Combine all slices
-    ...createGameStateSlice(set, get),
-    ...createPlayerSlice(set, get),
-    ...createUISlice(set, get),
-    ...createEventSlice(set, get),
-    ...createBotSlice(set, get),
-    ...createDebugSlice(set, get),
+    ...createGameStateSlice(set, get, api),
+    ...createPlayerSlice(set, get, api),
+    ...createUISlice(set, get, api),
+    ...createEventSlice(set, get, api),
+    ...createBotSlice(set, get, api),
+    ...createDebugSlice(set, get, api),
     
     // Game actions
     startGame: (config: GameConfig) => {
@@ -251,7 +247,7 @@ export const useGameStore = create<GameStore>()(
     },
     
     updateObservation: () => {
-      const { engine, humanPlayerId, playerConfigs, isSpectator } = get();
+      const { engine, humanPlayerId, isSpectator } = get();
       if (!engine) return;
       
       // Store full game state for spectator mode
@@ -345,8 +341,10 @@ export const useGameStore = create<GameStore>()(
         // Use tick() which properly handles active players and challenges
         const didSomething = eng.tick();
         get().updateObservation();
-        
-        if (didSomething && currentState.phase !== 'GAME_OVER') {
+
+        const nextState = eng.getState();
+
+        if (didSomething && nextState.phase !== 'GAME_OVER') {
           const { gameSpeed: currentSpeed } = get();
           setTimeout(() => get().processBotTurn(), Math.max(50, 100 / currentSpeed));
         }

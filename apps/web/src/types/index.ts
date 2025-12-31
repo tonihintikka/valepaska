@@ -1,9 +1,8 @@
-import type { 
-  PlayerId, 
-  Rank, 
-  Card, 
-  GameEvent, 
-  PlayerObservation 
+import type {
+  PlayerId,
+  Rank,
+  Card,
+  GameEvent,
 } from '@valepaska/core';
 
 export type UIPhase = 'start' | 'playing' | 'gameOver';

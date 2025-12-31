@@ -14,7 +14,7 @@ export const createDebugSlice: StateCreator<
   [],
   [],
   DebugSlice
-> = (set) => ({
+> = (set, _get, _store) => ({
   // Initial state
   debugMode: false,
   isSpectator: false,

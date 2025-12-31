@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
 import { RANK_DISPLAY } from '../types';
-import type { Rank } from '@valepaska/core';
 
 export function ActionBar() {
   const observation = useGameStore((state) => state.observation);
