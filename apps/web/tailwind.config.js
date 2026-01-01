@@ -9,12 +9,12 @@ export default {
         'bg-felt': '#0f1419',
         'bg-surface': '#1a1f2e',
         'bg-elevated': '#252b3b',
-        
+
         // Accent colors
         'accent-gold': '#d4af37',
         'accent-copper': '#b87333',
         'accent-ice': '#7dd3fc',
-        
+
         // Card suits
         'suit-red': '#dc2626',
         'suit-black': '#1e293b',
@@ -39,6 +39,13 @@ export default {
           '0%': { boxShadow: '0 0 5px rgba(212, 175, 55, 0.2)' },
           '100%': { boxShadow: '0 0 20px rgba(212, 175, 55, 0.6)' },
         },
+      },
+      // iOS safe area padding
+      padding: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
       },
     },
   },

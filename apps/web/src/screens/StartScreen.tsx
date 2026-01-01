@@ -35,9 +35,9 @@ export function StartScreen() {
   const updateSlot = (index: number, updates: Partial<PlayerSlotConfig>) => {
     setSlots(prev => prev.map((slot, i) => {
       if (i !== index) return slot;
-      
+
       const newSlot = { ...slot, ...updates };
-      
+
       // If switching to human, disable human on other slots
       if (updates.isHuman === true) {
         return newSlot;
@@ -107,7 +107,7 @@ export function StartScreen() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-start py-8 bg-bg-deep relative overflow-auto">
+    <div className="h-full w-full flex flex-col items-center justify-start pt-safe-top pb-4 px-4 bg-bg-deep relative overflow-auto">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-gold/5 rounded-full blur-3xl" />
@@ -121,13 +121,13 @@ export function StartScreen() {
         className="relative z-10 w-full max-w-2xl px-4"
       >
         {/* Title with tilted card logo */}
-        <Logo size="md" variant="gold" className="mb-2" />
-        
+        <Logo size="sm" variant="gold" className="mb-1" />
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-slate-400 text-center mb-6"
+          className="text-slate-400 text-center text-sm mb-3"
         >
           Suomalainen bluffikorttipeli
         </motion.p>
@@ -137,7 +137,7 @@ export function StartScreen() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex gap-2 justify-center mb-4"
+          className="flex gap-2 justify-center mb-3"
         >
           <button
             onClick={() => setPreset('pvb')}
@@ -164,15 +164,15 @@ export function StartScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="glass rounded-2xl p-4 mb-4"
+          className="glass rounded-xl p-3 mb-3"
         >
-          <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+          <h2 className="text-base font-semibold text-white mb-2 flex items-center gap-2">
             <span>Pelaajat</span>
             <span className="text-sm font-normal text-slate-400">
               ({enabledCount}/6 aktiivista)
             </span>
           </h2>
-          
+
           <div className="space-y-2">
             <AnimatePresence>
               {slots.map((slot, index) => (
@@ -181,20 +181,18 @@ export function StartScreen() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
-                    slot.enabled 
-                      ? 'bg-bg-elevated' 
+                  className={`flex items-center gap-3 p-2 rounded-lg transition-all ${slot.enabled
+                      ? 'bg-bg-elevated'
                       : 'bg-bg-surface/50 opacity-50'
-                  }`}
+                    }`}
                 >
                   {/* Enable checkbox */}
                   <button
                     onClick={() => updateSlot(index, { enabled: !slot.enabled })}
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-                      slot.enabled 
-                        ? 'bg-accent-gold border-accent-gold text-bg-deep' 
+                    className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${slot.enabled
+                        ? 'bg-accent-gold border-accent-gold text-bg-deep'
                         : 'border-slate-600 text-transparent hover:border-slate-500'
-                    }`}
+                      }`}
                   >
                     ✓
                   </button>
@@ -219,22 +217,20 @@ export function StartScreen() {
                     <button
                       onClick={() => updateSlot(index, { isHuman: true })}
                       disabled={!slot.enabled || (humanCount >= 1 && !slot.isHuman)}
-                      className={`px-2 py-1 text-xs transition-colors ${
-                        slot.isHuman 
-                          ? 'bg-accent-gold text-bg-deep' 
+                      className={`px-2 py-1 text-xs transition-colors ${slot.isHuman
+                          ? 'bg-accent-gold text-bg-deep'
                           : 'bg-bg-surface text-slate-400 hover:text-white disabled:opacity-50'
-                      }`}
+                        }`}
                     >
                       Ihminen
                     </button>
                     <button
                       onClick={() => updateSlot(index, { isHuman: false })}
                       disabled={!slot.enabled}
-                      className={`px-2 py-1 text-xs transition-colors ${
-                        !slot.isHuman 
-                          ? 'bg-accent-ice text-bg-deep' 
+                      className={`px-2 py-1 text-xs transition-colors ${!slot.isHuman
+                          ? 'bg-accent-ice text-bg-deep'
                           : 'bg-bg-surface text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       Botti
                     </button>
@@ -278,19 +274,17 @@ export function StartScreen() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="glass rounded-xl p-3 mb-4"
+          className="glass rounded-lg p-2.5 mb-3"
         >
           <label className="flex items-center gap-3 cursor-pointer">
             <button
               onClick={() => setDebugMode(!debugMode)}
-              className={`w-10 h-6 rounded-full transition-colors relative ${
-                debugMode ? 'bg-accent-gold' : 'bg-bg-elevated'
-              }`}
+              className={`w-10 h-6 rounded-full transition-colors relative ${debugMode ? 'bg-accent-gold' : 'bg-bg-elevated'
+                }`}
             >
-              <div 
-                className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                  debugMode ? 'left-5' : 'left-1'
-                }`} 
+              <div
+                className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${debugMode ? 'left-5' : 'left-1'
+                  }`}
               />
             </button>
             <div>
@@ -311,11 +305,10 @@ export function StartScreen() {
             whileTap={canStart ? { scale: 0.98 } : undefined}
             onClick={handleStart}
             disabled={!canStart}
-            className={`w-full btn text-lg py-4 ${
-              canStart 
-                ? 'btn-primary' 
+            className={`w-full btn text-base py-3 ${canStart
+                ? 'btn-primary'
                 : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-            }`}
+              }`}
           >
             {humanCount === 0 ? '👁️ Aloita katselu' : '🎮 Aloita peli'}
           </motion.button>
@@ -326,7 +319,7 @@ export function StartScreen() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-slate-500 text-xs mt-4 text-center"
+          className="text-slate-500 text-xs mt-3 text-center"
         >
           Pelaa kortteja nurinpäin ja väitä niiden arvoa. Muut voivat haastaa!
         </motion.p>
