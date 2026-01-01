@@ -107,7 +107,7 @@ export function StartScreen() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-start pt-safe-top pb-4 px-4 bg-bg-deep relative overflow-auto">
+    <div className="h-full w-full flex flex-col items-center justify-start pt-2 pb-4 px-4 bg-bg-deep relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-gold/5 rounded-full blur-3xl" />
@@ -182,16 +182,16 @@ export function StartScreen() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={`flex items-center gap-3 p-2 rounded-lg transition-all ${slot.enabled
-                      ? 'bg-bg-elevated'
-                      : 'bg-bg-surface/50 opacity-50'
+                    ? 'bg-bg-elevated'
+                    : 'bg-bg-surface/50 opacity-50'
                     }`}
                 >
                   {/* Enable checkbox */}
                   <button
                     onClick={() => updateSlot(index, { enabled: !slot.enabled })}
                     className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${slot.enabled
-                        ? 'bg-accent-gold border-accent-gold text-bg-deep'
-                        : 'border-slate-600 text-transparent hover:border-slate-500'
+                      ? 'bg-accent-gold border-accent-gold text-bg-deep'
+                      : 'border-slate-600 text-transparent hover:border-slate-500'
                       }`}
                   >
                     ✓
@@ -218,8 +218,8 @@ export function StartScreen() {
                       onClick={() => updateSlot(index, { isHuman: true })}
                       disabled={!slot.enabled || (humanCount >= 1 && !slot.isHuman)}
                       className={`px-2 py-1 text-xs transition-colors ${slot.isHuman
-                          ? 'bg-accent-gold text-bg-deep'
-                          : 'bg-bg-surface text-slate-400 hover:text-white disabled:opacity-50'
+                        ? 'bg-accent-gold text-bg-deep'
+                        : 'bg-bg-surface text-slate-400 hover:text-white disabled:opacity-50'
                         }`}
                     >
                       Ihminen
@@ -228,8 +228,8 @@ export function StartScreen() {
                       onClick={() => updateSlot(index, { isHuman: false })}
                       disabled={!slot.enabled}
                       className={`px-2 py-1 text-xs transition-colors ${!slot.isHuman
-                          ? 'bg-accent-ice text-bg-deep'
-                          : 'bg-bg-surface text-slate-400 hover:text-white'
+                        ? 'bg-accent-ice text-bg-deep'
+                        : 'bg-bg-surface text-slate-400 hover:text-white'
                         }`}
                     >
                       Botti
@@ -306,8 +306,8 @@ export function StartScreen() {
             onClick={handleStart}
             disabled={!canStart}
             className={`w-full btn text-base py-3 ${canStart
-                ? 'btn-primary'
-                : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+              ? 'btn-primary'
+              : 'bg-slate-700 text-slate-400 cursor-not-allowed'
               }`}
           >
             {humanCount === 0 ? '👁️ Aloita katselu' : '🎮 Aloita peli'}
