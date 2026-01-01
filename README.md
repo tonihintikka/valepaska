@@ -114,6 +114,12 @@ The game engine has been modularized (2025-01-27) for better maintainability:
 - All tests passing, public API unchanged
 - See `CHANGELOG.md` and `docs/MODULARIZATION_PLAN.md` for details
 
+### Recent Fixes (2025-01-01)
+- Fixed specific turn management issues in `core` tests.
+- Verified and fixed web UI challenge flow logic.
+- Resolved build issues in `web` app.
+
+
 ## Development
 
 ```bash

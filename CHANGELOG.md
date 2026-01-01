@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+#### Web UI Challenge Verification (2025-01-01)
+- Added rigorous test suite for challenge flow verification in `apps/web`.
+- Covers passive waiting, active passing, and strict turn order enforcement.
+
+### Fixed
+#### Challenge Visibility on Bot Turns (2025-01-01)
+Fixed bug where the challenge modal would not appear when a bot played a card.
+- **Problem:** `observation-factory` did not expose the pending play as `lastClaim`, so the UI didn't know there was something to challenge.
+- **Solution:** Updated `createObservation` to include `lastPlay` as a pending claim during `WAITING_FOR_CHALLENGES`.
+- **Files Changed:** `packages/core/src/engine/observation-factory.ts`, `packages/core/src/types/game-state.ts`
+
+#### Turn Management Tests (2025-01-01)
+Fixed failing tests in `game-engine.test.ts`.
+- **Problem:** Tests assumed Player 1 always started, but engine randomizes start player.
+- **Solution:** Updated tests to dynamically check `engine.getCurrentPlayer()`.
+
 
 #### Logo Component (2025-12-31)
 
