@@ -272,7 +272,8 @@ export class GameEngine {
     const validation = validateChallenge(
       playerId,
       this.state.lastPlay.playerId,
-      true
+      true,
+      this.state.activePlayerIds
     );
 
     if (!validation.valid) {

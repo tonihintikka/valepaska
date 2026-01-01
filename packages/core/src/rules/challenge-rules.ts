@@ -93,7 +93,8 @@ export interface ChallengeValidationResult {
 export function validateChallenge(
   challengerId: PlayerId,
   accusedId: PlayerId,
-  hasLastPlay: boolean
+  hasLastPlay: boolean,
+  activePlayerIds?: readonly PlayerId[]
 ): ChallengeValidationResult {
   if (!hasLastPlay) {
     return {
@@ -106,6 +107,14 @@ export function validateChallenge(
     return {
       valid: false,
       error: 'Cannot challenge your own play',
+    };
+  }
+
+  // If activePlayerIds is provided, check that challenger is still active
+  if (activePlayerIds && !activePlayerIds.includes(challengerId)) {
+    return {
+      valid: false,
+      error: 'Finished players cannot challenge',
     };
   }
 

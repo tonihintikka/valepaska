@@ -106,6 +106,25 @@ describe('Challenge Rules', () => {
       expect(result.valid).toBe(false);
       expect(result.error).toContain('No play to challenge');
     });
+
+    it('should reject challenge from finished player', () => {
+      const activePlayerIds = ['p1', 'p2', 'p3']; // p4 has finished
+      const result = validateChallenge('p4', 'p1', true, activePlayerIds);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Finished players cannot challenge');
+    });
+
+    it('should allow challenge from active player', () => {
+      const activePlayerIds = ['p1', 'p2', 'p3'];
+      const result = validateChallenge('p2', 'p1', true, activePlayerIds);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should allow challenge when activePlayerIds is not provided', () => {
+      // Backwards compatibility - if not provided, don't check
+      const result = validateChallenge('any', 'other', true);
+      expect(result.valid).toBe(true);
+    });
   });
 
   describe('getChallengerPriorityOrder()', () => {
