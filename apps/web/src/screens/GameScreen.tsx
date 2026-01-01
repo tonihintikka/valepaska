@@ -1,7 +1,6 @@
 import { GameTable } from '../components/GameTable';
 import { PlayerHand } from '../components/PlayerHand';
 import { ActionBar } from '../components/ActionBar';
-import { ChallengeModal } from '../components/ChallengeModal';
 import { EventLog } from '../components/EventLog';
 import { DebugPanel } from '../components/DebugPanel';
 import { VictoryOverlay } from '../components/VictoryOverlay';
@@ -13,7 +12,6 @@ import { useGameStore } from '../store/game-store';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
 export function GameScreen() {
-  const showChallengeModal = useGameStore((state) => state.showChallengeModal);
   const debugMode = useGameStore((state) => state.debugMode);
   const isSpectator = useGameStore((state) => state.isSpectator);
   const showVictoryOverlay = useGameStore((state) => state.showVictoryOverlay);
@@ -77,9 +75,6 @@ export function GameScreen() {
           </div>
         </div>
       )}
-
-      {/* Challenge modal */}
-      {showChallengeModal && !isSpectator && <ChallengeModal />}
 
       {/* Challenge indicator (spectator mode) */}
       {activeChallenge && isSpectator && (() => {
