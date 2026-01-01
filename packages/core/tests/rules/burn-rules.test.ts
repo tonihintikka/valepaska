@@ -8,29 +8,29 @@ import {
 import type { ClaimRecord } from '../../src/types/claim.js';
 
 describe('Burn Rules', () => {
-  const createClaimRecord = (rank: string, accepted = true, playerId = 'player1'): ClaimRecord => ({
+  const createClaimRecord = (rank: string, accepted = true, playerId = 'player1', count = 1): ClaimRecord => ({
     playerId,
     rank: rank as ClaimRecord['rank'],
-    count: 1,
+    count,
     timestamp: Date.now(),
     accepted,
   });
 
   describe('checkBurn()', () => {
     it('should trigger burn for 10', () => {
-      const result = checkBurn('10', []);
+      const result = checkBurn('10', 1, []);
       expect(result).toBe('TEN');
     });
 
     it('should trigger burn for A', () => {
-      const result = checkBurn('A', []);
+      const result = checkBurn('A', 1, []);
       expect(result).toBe('ACE');
     });
 
     it('should not trigger burn for other ranks', () => {
-      expect(checkBurn('7', [])).toBeNull();
-      expect(checkBurn('K', [])).toBeNull();
-      expect(checkBurn('2', [])).toBeNull();
+      expect(checkBurn('7', 1, [])).toBeNull();
+      expect(checkBurn('K', 1, [])).toBeNull();
+      expect(checkBurn('2', 1, [])).toBeNull();
     });
 
     it('should trigger burn for four consecutive same rank', () => {
@@ -39,7 +39,24 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
       ];
-      const result = checkBurn('7', history);
+      // playing 4th card (count 1)
+      const result = checkBurn('7', 1, history);
+      expect(result).toBe('FOUR_IN_ROW');
+    });
+
+    it('should trigger burn for multi-card claim (4 cards at once)', () => {
+      const history: ClaimRecord[] = [];
+      // playing 4 cards at once
+      const result = checkBurn('7', 4, history);
+      expect(result).toBe('FOUR_IN_ROW');
+    });
+
+    it('should trigger burn for cumulative count (2 + 2)', () => {
+      const history = [
+        createClaimRecord('7', true, 'player1', 2),
+      ];
+      // playing 2 cards
+      const result = checkBurn('7', 2, history);
       expect(result).toBe('FOUR_IN_ROW');
     });
   });
@@ -51,7 +68,7 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
       ];
-      expect(checkFourInRow(history, '7')).toBe(true);
+      expect(checkFourInRow(history, '7', 1)).toBe(true);
     });
 
     it('should not trigger with only 3 consecutive', () => {
@@ -59,7 +76,7 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
       ];
-      expect(checkFourInRow(history, '7')).toBe(false);
+      expect(checkFourInRow(history, '7', 1)).toBe(false);
     });
 
     it('should not count non-accepted claims', () => {
@@ -68,7 +85,7 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7', false), // Not accepted (lie)
       ];
-      expect(checkFourInRow(history, '7')).toBe(false);
+      expect(checkFourInRow(history, '7', 1)).toBe(false);
     });
 
     it('should reset count on different rank', () => {
@@ -78,7 +95,7 @@ describe('Burn Rules', () => {
         createClaimRecord('8'), // Different rank breaks chain
         createClaimRecord('7'),
       ];
-      expect(checkFourInRow(history, '7')).toBe(false);
+      expect(checkFourInRow(history, '7', 1)).toBe(false);
     });
 
     it('should work with mixed history', () => {
@@ -89,7 +106,7 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
       ];
-      expect(checkFourInRow(history, '7')).toBe(true);
+      expect(checkFourInRow(history, '7', 1)).toBe(true);
     });
 
     it('should trigger four-in-row even from different players', () => {
@@ -99,7 +116,7 @@ describe('Burn Rules', () => {
         createClaimRecord('7', true, 'player3'),
       ];
       // player4 claims 7 - should trigger burn
-      expect(checkFourInRow(history, '7')).toBe(true);
+      expect(checkFourInRow(history, '7', 1)).toBe(true);
     });
   });
 
@@ -110,6 +127,14 @@ describe('Burn Rules', () => {
         createClaimRecord('7'),
         createClaimRecord('7'),
         createClaimRecord('7'),
+      ];
+      expect(countConsecutiveSameRank(history, '7')).toBe(3);
+    });
+
+    it('should count multi-card claims correctly', () => {
+      const history = [
+        createClaimRecord('7', true, 'p1', 2),
+        createClaimRecord('7', true, 'p2', 1),
       ];
       expect(countConsecutiveSameRank(history, '7')).toBe(3);
     });

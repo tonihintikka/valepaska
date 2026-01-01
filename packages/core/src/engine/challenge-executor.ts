@@ -60,7 +60,7 @@ export function executeChallenge(
   const newClaimHistory = [...state.claimHistory, claimRecord];
 
   // Check if burn should occur (only when claim was true and it's a burn rank)
-  const burnReason = !result.wasLie ? checkBurn(claimRank as Rank, state.claimHistory) : null;
+  const burnReason = !result.wasLie ? checkBurn(claimRank as Rank, claimCount, state.claimHistory) : null;
 
   if (burnReason) {
     // Burn the pile instead of giving it to challenger
@@ -139,7 +139,7 @@ export function acceptClaim(state: GameState): {
   const newClaimHistory = [...state.claimHistory, claimRecord];
 
   // Check for burn
-  const burnReason = checkBurn(claimRank as Rank, newClaimHistory.slice(0, -1));
+  const burnReason = checkBurn(claimRank as Rank, claimCount, newClaimHistory.slice(0, -1));
 
   if (burnReason) {
     const newState = executeBurn(state, burnReason, newClaimHistory);

@@ -9,8 +9,16 @@ import type { ClaimRecord } from '../types/claim.js';
  * 2. Claiming A (and it's accepted)
  * 3. Four consecutive claims of the same rank
  */
+/**
+ * Checks if a claim triggers a burn
+ * Burns can be triggered by:
+ * 1. Claiming 10 (and it's accepted)
+ * 2. Claiming A (and it's accepted)
+ * 3. Four consecutive claims of the same rank (checking card counts)
+ */
 export function checkBurn(
   claimRank: Rank,
+  claimCount: number,
   claimHistory: readonly ClaimRecord[]
 ): BurnReason | null {
   // 10 burns
@@ -24,7 +32,7 @@ export function checkBurn(
   }
 
   // Check for four consecutive same rank
-  if (checkFourInRow(claimHistory, claimRank)) {
+  if (checkFourInRow(claimHistory, claimRank, claimCount)) {
     return 'FOUR_IN_ROW';
   }
 
@@ -37,19 +45,20 @@ export function checkBurn(
  */
 export function checkFourInRow(
   claimHistory: readonly ClaimRecord[],
-  newClaimRank: Rank
+  newClaimRank: Rank,
+  newClaimCount: number = 1
 ): boolean {
-  // Get the last 3 accepted claims
-  let consecutiveCount = 1; // The new claim counts as 1
-  
+  // Start with the current claim's count
+  let consecutiveCount = newClaimCount;
+
   for (let i = claimHistory.length - 1; i >= 0 && consecutiveCount < 4; i--) {
     const claim = claimHistory[i];
     if (!claim?.accepted) {
       continue; // Skip non-accepted claims
     }
-    
+
     if (claim.rank === newClaimRank) {
-      consecutiveCount++;
+      consecutiveCount += claim.count;
     } else {
       break; // Chain broken
     }
@@ -66,15 +75,15 @@ export function countConsecutiveSameRank(
   rank: Rank
 ): number {
   let count = 0;
-  
+
   for (let i = claimHistory.length - 1; i >= 0; i--) {
     const claim = claimHistory[i];
     if (!claim?.accepted) {
       continue;
     }
-    
+
     if (claim.rank === rank) {
-      count++;
+      count += claim.count;
     } else {
       break;
     }
@@ -91,7 +100,7 @@ export function claimsUntilFourInRow(
   rank: Rank
 ): number {
   const current = countConsecutiveSameRank(claimHistory, rank);
-  return Math.max(0, 4 - current - 1); // -1 because the new claim would add 1
+  return Math.max(0, 4 - current);
 }
 
 /**

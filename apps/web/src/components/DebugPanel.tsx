@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/game-store';
 import type { GameEvent, Rank } from '@valepaska/core';
 import { RANK_DISPLAY } from '../types';
 
 export function DebugPanel() {
+  const [copied, setCopied] = useState(false);
   const engine = useGameStore((state) => state.engine);
   const events = useGameStore((state) => state.events);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
@@ -15,7 +17,7 @@ export function DebugPanel() {
   const state = engine.getState();
   const currentPlayer = state.players[state.currentPlayerIndex];
 
-  const getPlayerName = (id: string) => 
+  const getPlayerName = (id: string) =>
     playerConfigs.find(p => p.id === id)?.name ?? id;
 
   const displayRank = (rank: Rank | string): string =>
@@ -41,6 +43,16 @@ export function DebugPanel() {
         return `🏆 ${getPlayerName(event.winnerId)} VOITTI!`;
       default:
         return event.type;
+    }
+  };
+
+  const handleCopyEvents = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(events, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy events', err);
     }
   };
 
@@ -72,11 +84,10 @@ export function DebugPanel() {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="bg-bg-surface rounded p-2">
             <div className="text-slate-400">Vaihe</div>
-            <div className={`font-mono font-medium ${
-              state.phase === 'GAME_OVER' ? 'text-accent-gold' :
+            <div className={`font-mono font-medium ${state.phase === 'GAME_OVER' ? 'text-accent-gold' :
               state.phase === 'WAITING_FOR_CHALLENGES' ? 'text-red-400' :
-              'text-accent-ice'
-            }`}>
+                'text-accent-ice'
+              }`}>
               {state.phase}
             </div>
           </div>
@@ -132,7 +143,7 @@ export function DebugPanel() {
               </span>
             </div>
             <div className="text-xs text-slate-400 mt-1">
-              Todelliset kortit: {state.lastPlay.cards.map(c => 
+              Todelliset kortit: {state.lastPlay.cards.map(c =>
                 `${RANK_DISPLAY[c.rank]}${c.suit === 'hearts' || c.suit === 'diamonds' ? '♥' : '♠'}`
               ).join(', ')}
             </div>
@@ -148,19 +159,17 @@ export function DebugPanel() {
             const hand = state.hands.get(player.id);
             const isCurrentPlayer = i === state.currentPlayerIndex;
             return (
-              <div 
+              <div
                 key={player.id}
-                className={`flex items-center justify-between text-xs px-2 py-1 rounded ${
-                  isCurrentPlayer ? 'bg-accent-gold/20 text-accent-gold' : 'text-slate-300'
-                }`}
+                className={`flex items-center justify-between text-xs px-2 py-1 rounded ${isCurrentPlayer ? 'bg-accent-gold/20 text-accent-gold' : 'text-slate-300'
+                  }`}
               >
                 <span className="truncate">
                   {player.name}
                   {player.id === humanPlayerId && ' 👤'}
                 </span>
-                <span className={`font-mono font-medium ${
-                  hand?.length === 0 ? 'text-red-400' : ''
-                }`}>
+                <span className={`font-mono font-medium ${hand?.length === 0 ? 'text-red-400' : ''
+                  }`}>
                   {hand?.length ?? 0} korttia
                 </span>
               </div>
@@ -171,10 +180,19 @@ export function DebugPanel() {
 
       {/* Events */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="p-3 pb-0">
-          <h3 className="text-xs font-medium text-slate-400 mb-2">
+        <div className="p-3 pb-0 flex items-center justify-between">
+          <h3 className="text-xs font-medium text-slate-400">
             TAPAHTUMAT ({events.length})
           </h3>
+          <button
+            onClick={handleCopyEvents}
+            className={`text-[10px] px-2 py-0.5 rounded transition-colors ${copied
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-600'
+              }`}
+          >
+            {copied ? 'Kopioitu!' : 'Kopioi JSON'}
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-3">
           <div className="space-y-1">
