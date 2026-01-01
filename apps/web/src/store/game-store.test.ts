@@ -158,7 +158,7 @@ describe('GameStore Challenge Flow', () => {
 
             // Human plays
             useGameStore.setState({
-                selectedCards: [cards![0].id],
+                selectedCards: [cards[0]!.id],
                 selectedRank: '7'
             });
             store.playCards();
@@ -214,7 +214,7 @@ describe('GameStore Challenge Flow', () => {
                 type: 'PLAY',
                 playerId,
                 timestamp: Date.now(),
-                cardIds: [hand[0].id],
+                cardIds: [hand[0]!.id],
                 claimRank: rankToPlay, // CLAIMED rank, not actual
                 claimCount: 1
             });
@@ -244,7 +244,7 @@ describe('GameStore Challenge Flow', () => {
             type: 'PLAY',
             playerId: p4,
             timestamp: Date.now(),
-            cardIds: [hand4[0].id],
+            cardIds: [hand4[0]!.id],
             claimRank: rankToPlay,
             claimCount: 1
         });
