@@ -111,7 +111,7 @@ export function runSimulation(config: SimulationConfig): SimulationResults {
     averageChallengesPerGame: totalChallenges / config.games,
     totalChallenges,
     successfulChallenges,
-    seed: config.seed,
+    ...(config.seed !== undefined && { seed: config.seed }),
   };
 }
 

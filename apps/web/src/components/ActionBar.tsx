@@ -133,8 +133,7 @@ export function ActionBar() {
                     Peruuta
                   </motion.button>
                   <motion.button
-                    whileHover={canSubmit ? { scale: 1.02 } : undefined}
-                    whileTap={canSubmit ? { scale: 0.98 } : undefined}
+                    {...(canSubmit && { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } })}
                     onClick={handlePlay}
                     disabled={!canSubmit}
                     className={`btn btn-primary ${!canSubmit ? 'btn-disabled' : ''}`}

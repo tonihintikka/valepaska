@@ -33,9 +33,11 @@ export function Card({
   return (
     <motion.div
       layout
-      whileHover={isClickable ? { y: -8 } : undefined}
-      whileTap={isClickable ? { scale: 0.95 } : undefined}
-      onClick={isClickable ? onClick : undefined}
+      {...(isClickable && { 
+        whileHover: { y: -8 }, 
+        whileTap: { scale: 0.95 },
+        onClick 
+      })}
       className={`
         relative rounded-lg shadow-card transition-shadow duration-200
         ${sizeClass}

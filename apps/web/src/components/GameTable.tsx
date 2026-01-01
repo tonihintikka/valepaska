@@ -33,11 +33,41 @@ export function GameTable() {
 
   return (
     <div className="relative w-full h-full felt-texture overflow-hidden">
-      {/* Watermark logo - embossed into the felt */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <div className="text-black/10 text-5xl sm:text-7xl font-serif font-bold tracking-[0.3em] rotate-[-8deg] uppercase drop-shadow-sm">
+      {/* Watermark logo - premium golden stitched look */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none gap-1 sm:gap-2">
+        {/* Joker emoji with golden glow */}
+        <div
+          className="text-4xl sm:text-6xl md:text-8xl rotate-[-8deg] opacity-20"
+          style={{
+            filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.4))',
+          }}
+        >
+          🃏
+        </div>
+        {/* Text with golden stitch/embroidery effect */}
+        <div
+          className="text-2xl sm:text-4xl md:text-6xl font-serif font-bold tracking-[0.15em] sm:tracking-[0.25em] rotate-[-8deg] uppercase"
+          style={{
+            color: 'transparent',
+            background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, rgba(180, 140, 40, 0.12) 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStroke: '1px rgba(212, 175, 55, 0.2)',
+            textShadow: `
+              0 0 20px rgba(212, 175, 55, 0.15),
+              0 2px 4px rgba(0, 0, 0, 0.3)
+            `,
+          }}
+        >
           Valepaska
         </div>
+        {/* Decorative line under text */}
+        <div
+          className="w-24 sm:w-36 md:w-48 h-[1px] rotate-[-8deg] mt-1 sm:mt-2"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.2) 20%, rgba(212, 175, 55, 0.25) 50%, rgba(212, 175, 55, 0.2) 80%, transparent 100%)',
+          }}
+        />
       </div>
 
       {/* Table edge glow */}
@@ -126,12 +156,12 @@ export function GameTable() {
             key={player.id}
             position={position}
             name={player.name}
-            avatar={player.avatar}
+            {...(player.avatar && { avatar: player.avatar })}
             handSize={handSize}
             isCurrentPlayer={isCurrentPlayer && !isFinished}
-            difficulty={player.botDifficulty}
-            cards={cards}
-            standing={standing}
+            {...(player.botDifficulty && { difficulty: player.botDifficulty })}
+            {...(cards && { cards })}
+            {...(standing && { standing })}
             isFinished={isFinished}
           />
         );
@@ -173,14 +203,8 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
     'top-right': 'top-4 right-1/4',
   };
 
-  const cardRotation: Record<PlayerPosition, string> = {
-    bottom: '',
-    top: 'rotate-180',
-    left: 'rotate-90',
-    right: '-rotate-90',
-    'top-left': '',
-    'top-right': '',
-  };
+  // For left/right positions, use horizontal layout for cards + count
+  const isHorizontal = position === 'left' || position === 'right';
 
   return (
     <div className={`absolute ${positionClasses[position]}`}>
@@ -221,36 +245,38 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
           </div>
         </div>
 
-        {/* Hand representation */}
-        {cards ? (
-          // Spectator mode: show actual cards
-          <div className={`flex justify-center flex-wrap gap-1 max-w-[200px] ${cardRotation[position]}`}>
-            {cards.map((card) => (
-              <MiniCard key={card.id} card={card} />
-            ))}
-          </div>
-        ) : (
-          // Normal mode: show card backs
-          <div className={`flex justify-center -space-x-4 ${cardRotation[position]}`}>
-            {Array.from({ length: Math.min(handSize, 5) }).map((_, i) => (
-              <div
-                key={i}
-                className="w-8 h-12 rounded bg-gradient-to-br from-blue-800 to-blue-900 border border-blue-700/50 shadow-sm"
-                style={{ transform: `rotate(${(i - 2) * 5}deg)` }}
-              />
-            ))}
-          </div>
-        )}
+        {/* Hand representation with card count - horizontal layout for side positions */}
+        <div className={`flex items-center gap-2 ${isHorizontal ? 'flex-row' : 'flex-col'}`}>
+          {/* Cards */}
+          {cards ? (
+            // Spectator mode: show actual cards
+            <div className="flex justify-center flex-wrap gap-1 max-w-[200px]">
+              {cards.map((card) => (
+                <MiniCard key={card.id} card={card} />
+              ))}
+            </div>
+          ) : (
+            // Normal mode: show card backs - stack vertically for side positions
+            <div className={`flex justify-center ${isHorizontal ? 'flex-col -space-y-6' : '-space-x-4'}`}>
+              {Array.from({ length: Math.min(handSize, 5) }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-8 h-12 rounded bg-gradient-to-br from-blue-800 to-blue-900 border border-blue-700/50 shadow-sm"
+                  style={isHorizontal ? {} : { transform: `rotate(${(i - 2) * 5}deg)` }}
+                />
+              ))}
+            </div>
+          )}
 
-        {/* Card count */}
-        <div className="text-center mt-2">
-          <span className={`text-xs font-medium ${handSize === 0 ? 'text-red-400' : 'text-slate-400'
-            }`}>
-            {handSize} korttia
-          </span>
+          {/* Card count - beside cards for horizontal, below for vertical */}
+          <div className={isHorizontal ? '' : 'text-center mt-2'}>
+            <span className={`text-xs font-medium ${handSize === 0 ? 'text-red-400' : 'text-slate-400'
+              }`}>
+              {handSize} korttia
+            </span>
+          </div>
         </div>
       </motion.div>
     </div>
   );
 }
-

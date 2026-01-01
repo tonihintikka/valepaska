@@ -53,8 +53,8 @@ program
       games,
       players,
       bots: bots.slice(0, players),
-      seed,
       verbose,
+      ...(seed !== undefined && { seed }),
     };
 
     // Run simulation

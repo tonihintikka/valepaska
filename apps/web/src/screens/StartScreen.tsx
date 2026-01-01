@@ -59,8 +59,8 @@ export function StartScreen() {
         id: `player-${index}`,
         name: slot.name,
         isHuman: slot.isHuman,
-        botDifficulty: slot.isHuman ? undefined : slot.difficulty,
-        avatar: AVATARS[index % AVATARS.length],
+        ...(!slot.isHuman && { botDifficulty: slot.difficulty }),
+        avatar: AVATARS[index % AVATARS.length]!,
       }));
 
     startGame({
@@ -297,8 +297,7 @@ export function StartScreen() {
       <div className="w-full shrink-0 z-20 bg-bg-deep/80 backdrop-blur-md border-t border-slate-800/50 pb-safe-bottom">
         <div className="p-4 flex flex-col items-center">
           <motion.button
-            whileHover={canStart ? { scale: 1.02 } : undefined}
-            whileTap={canStart ? { scale: 0.98 } : undefined}
+            {...(canStart && { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } })}
             onClick={handleStart}
             disabled={!canStart}
             className={`w-full max-w-md btn text-base font-bold py-3.5 shadow-lg ${canStart

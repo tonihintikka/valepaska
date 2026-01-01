@@ -26,13 +26,13 @@ export function ChallengeRevealOverlay({
   onComplete,
 }: ChallengeRevealOverlayProps) {
   return (
-    <AnimatePresence onExitComplete={onComplete}>
+    <AnimatePresence {...(onComplete && { onExitComplete: onComplete })}>
       <motion.div
         className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onComplete}
+        {...(onComplete && { onClick: onComplete })}
       >
         {/* Backdrop */}
         <motion.div

@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/bots" },
+    { "path": "./packages/simulator" },
+    { "path": "./apps/web" }
+  ]
+}
+

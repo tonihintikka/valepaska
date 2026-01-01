@@ -34,7 +34,7 @@ export function ChallengeIndicator({
   const origin = POSITION_ORIGINS[challengerPosition];
 
   return (
-    <AnimatePresence onExitComplete={onComplete}>
+    <AnimatePresence {...(onComplete && { onExitComplete: onComplete })}>
       <motion.div
         key={challengerId}
         className="absolute inset-0 pointer-events-none z-50 overflow-hidden"

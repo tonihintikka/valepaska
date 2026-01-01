@@ -19,13 +19,7 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   }
 }
-
-
-
-

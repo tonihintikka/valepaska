@@ -115,7 +115,7 @@ export function GameScreen() {
         return (
           <VictoryOverlay
             winnerName={winner.name}
-            winnerAvatar={winner.avatar}
+            {...(winner.avatar && { winnerAvatar: winner.avatar })}
             onComplete={dismissVictoryOverlay}
           />
         );
