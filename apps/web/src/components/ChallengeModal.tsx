@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useGameStore } from '../store/game-store';
 import { RANK_DISPLAY } from '../types';
 
@@ -16,20 +17,36 @@ export function ChallengeModal() {
   const claimingPlayer = playerConfigs.find((p) => p.id === lastClaim.playerId);
   const isOwnClaim = lastClaim.playerId === humanPlayerId;
 
+  const [isPeeking, setIsPeeking] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+      className={`fixed inset-0 flex items-center justify-center z-50 transition-colors duration-300 ${isPeeking ? 'bg-transparent pointer-events-none' : 'bg-black/40 backdrop-blur-[2px]'
+        }`}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        animate={{ scale: 1, opacity: isPeeking ? 0 : 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: 'spring', bounce: 0.3 }}
-        className="glass rounded-2xl p-6 max-w-md w-full mx-4"
+        className="glass rounded-2xl p-6 max-w-md w-full mx-4 relative"
       >
+        {/* Peek button */}
+        <button
+          className="absolute top-2 right-2 p-2 text-slate-400 hover:text-white transition-colors z-10"
+          onMouseDown={() => setIsPeeking(true)}
+          onMouseUp={() => setIsPeeking(false)}
+          onMouseLeave={() => setIsPeeking(false)}
+          onTouchStart={() => setIsPeeking(true)}
+          onTouchEnd={() => setIsPeeking(false)}
+          title="Pidä pohjassa nähdäksesi pöydän"
+        >
+          👁️
+        </button>
+
         {/* Timer */}
         <div className="flex justify-center mb-4">
           <motion.div
@@ -38,9 +55,8 @@ export function ChallengeModal() {
             animate={{ scale: 1 }}
             className="w-16 h-16 rounded-full bg-bg-elevated flex items-center justify-center"
           >
-            <span className={`text-3xl font-bold ${
-              challengeTimeLeft <= 2 ? 'text-red-400' : 'text-accent-gold'
-            }`}>
+            <span className={`text-3xl font-bold ${challengeTimeLeft <= 2 ? 'text-red-400' : 'text-accent-gold'
+              }`}>
               {challengeTimeLeft}
             </span>
           </motion.div>
