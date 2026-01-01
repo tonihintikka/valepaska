@@ -155,10 +155,12 @@ describe('GameStore Challenge Flow', () => {
         if (engine.getCurrentPlayer().id === 'p1') {
             const cards = engine.getState().hands.get('p1');
             if (!cards || cards.length === 0) throw new Error('Human has no cards');
+            const firstCard = cards[0];
+            if (!firstCard) throw new Error('First card is undefined');
 
             // Human plays
             useGameStore.setState({
-                selectedCards: [cards[0]!.id],
+                selectedCards: [firstCard.id],
                 selectedRank: '7'
             });
             store.playCards();
@@ -209,12 +211,14 @@ describe('GameStore Challenge Flow', () => {
         const playAndAccept = (playerId: string) => {
             const hand = engine.getState().hands.get(playerId);
             if (!hand || hand.length === 0) throw new Error('No cards');
+            const firstCard = hand[0];
+            if (!firstCard) throw new Error('First card is undefined');
 
             engine.submitMove(playerId, {
                 type: 'PLAY',
                 playerId,
                 timestamp: Date.now(),
-                cardIds: [hand[0]!.id],
+                cardIds: [firstCard.id],
                 claimRank: rankToPlay, // CLAIMED rank, not actual
                 claimCount: 1
             });
@@ -239,12 +243,14 @@ describe('GameStore Challenge Flow', () => {
         // Play 4th card - this should trigger burn on acceptance
         const hand4 = engine.getState().hands.get(p4);
         if (!hand4 || hand4.length === 0) throw new Error('No cards');
+        const fourthCard = hand4[0];
+        if (!fourthCard) throw new Error('Fourth card is undefined');
 
         engine.submitMove(p4, {
             type: 'PLAY',
             playerId: p4,
             timestamp: Date.now(),
-            cardIds: [hand4[0]!.id],
+            cardIds: [fourthCard.id],
             claimRank: rankToPlay,
             claimCount: 1
         });
