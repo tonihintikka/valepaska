@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Confirmed bots receive only `PlayerObservation` and cannot access hidden `GameState`.
 - Ensured `hand` arrays are immutable copies to prevent state leaks.
 
+#### 4-in-a-Row Burn Rule Verification (2025-01-01)
+- Verified that 4 consecutive **claimed** same rank burns the table, regardless of actual cards or which players made the claims.
+- Added integration test in `apps/web/src/store/game-store.test.ts`.
+
 ### Fixed
 #### Challenge Visibility on Bot Turns (2025-01-01)
 Fixed bug where the challenge modal would not appear when a bot played a card.

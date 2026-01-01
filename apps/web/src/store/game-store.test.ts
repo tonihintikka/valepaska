@@ -187,4 +187,81 @@ describe('GameStore Challenge Flow', () => {
             }
         }
     });
+
+    it('should burn table on 4 consecutive same rank claims (CORE LOGIC)', async () => {
+        // This test verifies the CORE engine logic for 4-in-a-row burn
+        // UI timer integration is complex; core logic is verified in burn-rules.test.ts
+
+        const store = useGameStore.getState();
+        const players = [
+            { id: 'p1', name: 'Human', isHuman: true },
+            { id: 'b1', name: 'Bot 1', isHuman: false },
+            { id: 'b2', name: 'Bot 2', isHuman: false },
+            { id: 'b3', name: 'Bot 3', isHuman: false }
+        ];
+
+        store.startGame({ players, seed: 123456 });
+
+        const engine = useGameStore.getState().engine!;
+        const rankToPlay = '5'; // Test with claimed rank '5'
+
+        // Helper to play and accept claim (bypassing UI timers)
+        const playAndAccept = (playerId: string) => {
+            const hand = engine.getState().hands.get(playerId);
+            if (!hand || hand.length === 0) throw new Error('No cards');
+
+            engine.submitMove(playerId, {
+                type: 'PLAY',
+                playerId,
+                timestamp: Date.now(),
+                cardIds: [hand[0].id],
+                claimRank: rankToPlay, // CLAIMED rank, not actual
+                claimCount: 1
+            });
+
+            // Directly accept claim (simulates no challenge + timer expiry)
+            engine.processChallenges();
+        };
+
+        // Play 4 consecutive claims of rank '5' from different players
+        const p1 = engine.getCurrentPlayer().id;
+        playAndAccept(p1);
+
+        const p2 = engine.getCurrentPlayer().id;
+        expect(p2).not.toBe(p1);
+        playAndAccept(p2);
+
+        const p3 = engine.getCurrentPlayer().id;
+        playAndAccept(p3);
+
+        const p4 = engine.getCurrentPlayer().id;
+
+        // Play 4th card - this should trigger burn on acceptance
+        const hand4 = engine.getState().hands.get(p4);
+        if (!hand4 || hand4.length === 0) throw new Error('No cards');
+
+        engine.submitMove(p4, {
+            type: 'PLAY',
+            playerId: p4,
+            timestamp: Date.now(),
+            cardIds: [hand4[0].id],
+            claimRank: rankToPlay,
+            claimCount: 1
+        });
+
+        // Accept claim - this triggers burn check
+        engine.processChallenges();
+
+        // Verify burn happened
+        const state = engine.getState();
+
+        // Table should be empty (burned)
+        expect(state.tablePile.length).toBe(0);
+        // Burn pile should have 4 cards
+        expect(state.burnPile.length).toBe(4);
+        // Phase should be ready for play
+        expect(state.phase).toBe('WAITING_FOR_PLAY');
+        // Player 4 should continue (burn gives extra turn)
+        expect(state.currentPlayerIndex).toBe(state.players.findIndex(p => p.id === p4));
+    });
 });
