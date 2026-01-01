@@ -351,6 +351,18 @@ export class GameEngine {
     // Check if accused finished (if they continue, they might have emptied hand)
     if (result.accusedContinues) {
       this.checkForFinish(accusedId, false); // Challenge failed, so not challenged successfully
+      
+      // If the accused has finished, advance turn to next active player
+      if (this.state.phase !== 'GAME_OVER' && !this.state.activePlayerIds.includes(accusedId)) {
+        const previousPlayer = this.state.players[this.state.currentPlayerIndex]!;
+        this.state = advanceTurn(this.state);
+        const currentPlayer = this.getCurrentPlayer();
+        
+        this.eventEmitter.emit('TURN_ADVANCED', {
+          previousPlayerId: previousPlayer.id,
+          currentPlayerId: currentPlayer.id,
+        });
+      }
     }
 
     if (this.state.phase === 'GAME_OVER') {
@@ -384,6 +396,18 @@ export class GameEngine {
       this.checkForFinish(playerId, false); // No challenge, so not challenged successfully
 
       if (this.state.phase !== 'GAME_OVER') {
+        // If the player who burned has finished, advance turn to next active player
+        if (!this.state.activePlayerIds.includes(playerId)) {
+          const previousPlayer = this.state.players[this.state.currentPlayerIndex]!;
+          this.state = advanceTurn(this.state);
+          const currentPlayer = this.getCurrentPlayer();
+          
+          this.eventEmitter.emit('TURN_ADVANCED', {
+            previousPlayerId: previousPlayer.id,
+            currentPlayerId: currentPlayer.id,
+          });
+        }
+
         // Replenish hands
         this.replenishAllHands();
       }
