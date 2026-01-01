@@ -21,7 +21,7 @@ export function EventLog() {
       case 'CHALLENGE_DECLARED':
         return `${getPlayerName(event.challengerId)} haastoi ${getPlayerName(event.accusedId)}!`;
       case 'CHALLENGE_RESOLVED':
-        return event.wasLie 
+        return event.wasLie
           ? `Vale paljastui! ${getPlayerName(event.accusedId)} nostaa pakan`
           : `Totta oli! ${getPlayerName(event.challengerId)} nostaa pakan`;
       case 'PILE_BURNED':
@@ -61,14 +61,14 @@ export function EventLog() {
   if (recentEvents.length === 0) return null;
 
   return (
-    <div className="w-72 glass rounded-xl p-3 max-h-64 overflow-hidden">
+    <div className="w-48 sm:w-72 glass rounded-xl p-2 sm:p-3 max-h-28 sm:max-h-48 overflow-hidden">
       <div className="text-xs text-slate-400 mb-2 font-medium">Tapahtumat</div>
       <div className="space-y-1">
         <AnimatePresence mode="popLayout">
           {recentEvents.map((event, index) => {
             const text = formatEvent(event);
             if (!text) return null;
-            
+
             return (
               <motion.div
                 key={`${event.type}-${index}`}
