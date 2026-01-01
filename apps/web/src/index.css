@@ -162,6 +162,76 @@
   .glow-ice {
     box-shadow: 0 0 20px rgba(125, 211, 252, 0.4);
   }
+  
+  /* PWA Update Prompt */
+  .update-prompt {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .update-prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid #d4af37;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+  }
+  
+  .update-prompt-text {
+    color: #f1f5f9;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .update-prompt-button {
+    padding: 0.5rem 1rem;
+    background: #d4af37;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .update-prompt-button:hover {
+    background: #f4cf67;
+  }
+  
+  .update-prompt-dismiss {
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #475569;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .update-prompt-dismiss:hover {
+    border-color: #64748b;
+    color: #cbd5e1;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
 }
 
 @layer utilities {

@@ -2,6 +2,7 @@ import { useGameStore } from './store/game-store';
 import { StartScreen } from './screens/StartScreen';
 import { GameScreen } from './screens/GameScreen';
 import { GameOverScreen } from './screens/GameOverScreen';
+import { UpdatePrompt } from './components/UpdatePrompt';
 
 export function App() {
   const phase = useGameStore((state) => state.uiPhase);
@@ -11,7 +12,7 @@ export function App() {
       {phase === 'start' && <StartScreen />}
       {phase === 'playing' && <GameScreen />}
       {phase === 'gameOver' && <GameOverScreen />}
+      <UpdatePrompt />
     </div>
   );
 }
-

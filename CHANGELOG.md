@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+#### Progressive Web App (PWA) (2025-01-01)
+- Converted app to installable PWA with offline support.
+- Added Service Worker for asset caching.
+- Added "Uusi versio saatavilla" update prompt when new version deploys.
+- Custom app icons for iOS/Android home screen.
+
 #### Web UI Challenge Verification (2025-01-01)
 - Added rigorous test suite for challenge flow verification in `apps/web`.
 - Covers passive waiting, active passing, and strict turn order enforcement.
