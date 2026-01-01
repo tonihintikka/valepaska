@@ -107,223 +107,213 @@ export function StartScreen() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-start pt-2 pb-4 px-4 bg-bg-deep relative overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col bg-bg-deep relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-gold/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-ice/5 rounded-full blur-3xl" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-gold/5 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-ice/5 rounded-full blur-3xl opacity-50" />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-2xl px-4"
-      >
-        {/* Title with tilted card logo */}
-        <Logo size="sm" variant="gold" className="mb-1" />
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-slate-400 text-center text-sm mb-3"
-        >
-          Suomalainen bluffikorttipeli
-        </motion.p>
-
-        {/* Quick presets */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex gap-2 justify-center mb-3"
-        >
-          <button
-            onClick={() => setPreset('pvb')}
-            className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors"
-          >
-            🎮 Pelaaja vs Botit
-          </button>
-          <button
-            onClick={() => setPreset('bvb')}
-            className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors"
-          >
-            🤖 Botit vs Botit
-          </button>
-          <button
-            onClick={() => setPreset('hard')}
-            className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors"
-          >
-            💀 Haaste-moodi
-          </button>
-        </motion.div>
-
-        {/* Player slots */}
+      {/* Main Scrollable Content */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden px-4 pt-safe-top pb-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="glass rounded-xl p-3 mb-3 overflow-hidden"
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-2xl mx-auto"
         >
-          <h2 className="text-base font-semibold text-white mb-2 flex items-center gap-2">
-            <span>Pelaajat</span>
-            <span className="text-sm font-normal text-slate-400">
-              ({enabledCount}/6 aktiivista)
-            </span>
-          </h2>
+          {/* Title with tilted card logo */}
+          <div className="flex flex-col items-center pt-2">
+            <Logo size="sm" variant="gold" className="mb-1" />
 
-          <div className="space-y-2">
-            <AnimatePresence>
-              {slots.map((slot, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`flex flex-wrap items-center gap-2 p-2 rounded-lg transition-all ${slot.enabled
-                    ? 'bg-bg-elevated'
-                    : 'bg-bg-surface/50 opacity-50'
-                    }`}
-                >
-                  {/* Enable checkbox */}
-                  <button
-                    onClick={() => updateSlot(index, { enabled: !slot.enabled })}
-                    className={`w-6 h-6 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${slot.enabled
-                      ? 'bg-accent-gold border-accent-gold text-bg-deep'
-                      : 'border-slate-600 text-transparent hover:border-slate-500'
-                      }`}
-                  >
-                    ✓
-                  </button>
-
-                  {/* Avatar */}
-                  <span className="text-lg shrink-0">
-                    {slot.isHuman ? '👤' : '🤖'}
-                  </span>
-
-                  {/* Name input */}
-                  <input
-                    type="text"
-                    value={slot.name}
-                    onChange={(e) => updateSlot(index, { name: e.target.value })}
-                    disabled={!slot.enabled}
-                    className="flex-1 min-w-[80px] max-w-[120px] bg-transparent text-white text-sm px-2 py-1 rounded border border-transparent focus:border-slate-600 focus:outline-none disabled:text-slate-500"
-                    placeholder={`Pelaaja ${index + 1}`}
-                  />
-
-                  {/* Type toggle */}
-                  <div className="flex rounded-lg overflow-hidden shrink-0">
-                    <button
-                      onClick={() => updateSlot(index, { isHuman: true })}
-                      disabled={!slot.enabled || (humanCount >= 1 && !slot.isHuman)}
-                      className={`px-2 py-1 text-xs transition-colors ${slot.isHuman
-                        ? 'bg-accent-gold text-bg-deep'
-                        : 'bg-bg-surface text-slate-400 hover:text-white disabled:opacity-50'
-                        }`}
-                    >
-                      👤
-                    </button>
-                    <button
-                      onClick={() => updateSlot(index, { isHuman: false })}
-                      disabled={!slot.enabled}
-                      className={`px-2 py-1 text-xs transition-colors ${!slot.isHuman
-                        ? 'bg-accent-ice text-bg-deep'
-                        : 'bg-bg-surface text-slate-400 hover:text-white'
-                        }`}
-                    >
-                      🤖
-                    </button>
-                  </div>
-
-                  {/* Difficulty (only for bots) */}
-                  {!slot.isHuman && (
-                    <select
-                      value={slot.difficulty}
-                      onChange={(e) => updateSlot(index, { difficulty: e.target.value as BotDifficulty })}
-                      disabled={!slot.enabled}
-                      className="bg-bg-surface text-slate-300 text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none focus:border-slate-500 disabled:opacity-50 shrink-0 w-[72px]"
-                    >
-                      {DIFFICULTIES.map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-slate-400 text-center text-sm mb-4"
+            >
+              Suomalainen bluffikorttipeli
+            </motion.p>
           </div>
 
-          {/* Warnings */}
-          {humanCount === 0 && (
-            <div className="mt-3 text-xs text-accent-ice flex items-center gap-2">
-              <span>👁️</span>
-              <span>Katselutila: Seuraat bottien peliä</span>
-            </div>
-          )}
-          {enabledCount < 2 && (
-            <div className="mt-3 text-xs text-red-400 flex items-center gap-2">
-              <span>⚠️</span>
-              <span>Valitse vähintään 2 pelaajaa</span>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Debug mode toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="glass rounded-lg p-2.5 mb-3"
-        >
-          <label className="flex items-center gap-3 cursor-pointer">
+          {/* Quick presets */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-wrap gap-2 justify-center mb-4"
+          >
             <button
-              onClick={() => setDebugMode(!debugMode)}
-              className={`w-10 h-6 rounded-full transition-colors relative ${debugMode ? 'bg-accent-gold' : 'bg-bg-elevated'
-                }`}
+              onClick={() => setPreset('pvb')}
+              className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
             >
-              <div
-                className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${debugMode ? 'left-5' : 'left-1'
-                  }`}
-              />
+              🎮 Pelaaja vs Botit
             </button>
-            <div>
-              <div className="text-sm text-white">Debug-tila</div>
-              <div className="text-xs text-slate-400">Näytä pelin sisäinen tila ja tapahtumat</div>
-            </div>
-          </label>
-        </motion.div>
+            <button
+              onClick={() => setPreset('bvb')}
+              className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
+            >
+              🤖 Botit vs Botit
+            </button>
+            <button
+              onClick={() => setPreset('hard')}
+              className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
+            >
+              💀 Haaste-moodi
+            </button>
+          </motion.div>
 
-        {/* Start button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
+          {/* Player slots */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="glass rounded-xl p-3 mb-3 overflow-hidden"
+          >
+            <h2 className="text-base font-semibold text-white mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span>Pelaajat</span>
+                <span className="text-sm font-normal text-slate-400">
+                  ({enabledCount}/6)
+                </span>
+              </span>
+            </h2>
+
+            <div className="space-y-2">
+              <AnimatePresence>
+                {slots.map((slot, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex flex-wrap items-center gap-2 p-2 rounded-lg transition-colors border ${slot.enabled
+                        ? 'bg-bg-elevated border-slate-700/50'
+                        : 'bg-bg-surface/30 border-transparent opacity-50'
+                      }`}
+                  >
+                    {/* Enable checbox */}
+                    <button
+                      onClick={() => updateSlot(index, { enabled: !slot.enabled })}
+                      className={`w-8 h-8 shrink-0 rounded flex items-center justify-center transition-colors ${slot.enabled
+                          ? 'bg-accent-gold text-bg-deep font-bold'
+                          : 'bg-bg-surface border border-slate-600 text-transparent'
+                        }`}
+                    >
+                      {slot.enabled && '✓'}
+                    </button>
+
+                    <div className="flex-1 min-w-[120px] flex items-center gap-2">
+                      {/* Name input */}
+                      <input
+                        type="text"
+                        value={slot.name}
+                        onChange={(e) => updateSlot(index, { name: e.target.value })}
+                        disabled={!slot.enabled}
+                        className="w-full bg-transparent text-white text-sm px-2 py-1.5 rounded focus:bg-bg-surface focus:outline-none focus:ring-1 focus:ring-accent-gold/50"
+                        placeholder={`Pelaaja ${index + 1}`}
+                      />
+                    </div>
+
+                    {/* Bot/Human Toggles */}
+                    <div className="flex rounded-lg overflow-hidden shrink-0 border border-slate-700/50">
+                      <button
+                        onClick={() => updateSlot(index, { isHuman: true })}
+                        disabled={!slot.enabled || (humanCount >= 1 && !slot.isHuman)}
+                        className={`w-8 h-8 flex items-center justify-center text-sm transition-colors ${slot.isHuman
+                            ? 'bg-accent-gold text-bg-deep'
+                            : 'bg-bg-surface text-slate-500 hover:text-slate-300'
+                          }`}
+                        title="Ihminen"
+                      >
+                        👤
+                      </button>
+                      <button
+                        onClick={() => updateSlot(index, { isHuman: false })}
+                        disabled={!slot.enabled}
+                        className={`w-8 h-8 flex items-center justify-center text-sm transition-colors ${!slot.isHuman
+                            ? 'bg-accent-ice text-bg-deep'
+                            : 'bg-bg-surface text-slate-500 hover:text-slate-300'
+                          }`}
+                        title="Botti"
+                      >
+                        🤖
+                      </button>
+                    </div>
+
+                    {/* Difficulty (only for bots) */}
+                    {!slot.isHuman && slot.enabled && (
+                      <select
+                        value={slot.difficulty}
+                        onChange={(e) => updateSlot(index, { difficulty: e.target.value as BotDifficulty })}
+                        className="bg-bg-surface text-slate-300 text-xs px-2 py-1.5 rounded border border-slate-700 focus:outline-none focus:border-accent-ice w-20"
+                      >
+                        {DIFFICULTIES.map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Warnings */}
+            <div className="mt-3 flex gap-4 min-h-[1.5em]">
+              {humanCount === 0 && (
+                <div className="text-xs text-accent-ice flex items-center gap-1.5">
+                  <span>👁️</span> Seuraat peliä
+                </div>
+              )}
+              {enabledCount < 2 && (
+                <div className="text-xs text-red-400 flex items-center gap-1.5">
+                  <span>⚠️</span> Valitse min. 2
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Debug mode toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex items-center justify-center mb-6"
+          >
+            <label className="flex items-center gap-2 cursor-pointer opacity-60 hover:opacity-100 transition-opacity p-2">
+              <input
+                type="checkbox"
+                checked={debugMode}
+                onChange={() => setDebugMode(!debugMode)}
+                className="accent-accent-gold"
+              />
+              <span className="text-xs text-slate-400">Debug-tila</span>
+            </label>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Fixed Sticky Footer for Start Game */}
+      <div className="w-full shrink-0 z-20 bg-bg-deep/80 backdrop-blur-md border-t border-slate-800/50 pb-safe-bottom">
+        <div className="p-4 flex flex-col items-center">
           <motion.button
             whileHover={canStart ? { scale: 1.02 } : undefined}
             whileTap={canStart ? { scale: 0.98 } : undefined}
             onClick={handleStart}
             disabled={!canStart}
-            className={`w-full btn text-base py-3 ${canStart
-              ? 'btn-primary'
-              : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+            className={`w-full max-w-md btn text-base font-bold py-3.5 shadow-lg ${canStart
+                ? 'btn-primary shadow-glow-gold/20'
+                : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
               }`}
           >
-            {humanCount === 0 ? '👁️ Aloita katselu' : '🎮 Aloita peli'}
+            {humanCount === 0 ? 'ALOITA KATSELU' : 'ALOITA PELI'}
           </motion.button>
-        </motion.div>
 
-        {/* Rules hint */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-slate-500 text-xs mt-3 text-center"
-        >
-          Pelaa kortteja nurinpäin ja väitä niiden arvoa. Muut voivat haastaa!
-        </motion.p>
-      </motion.div>
+          <p className="text-slate-500 text-[10px] mt-2 text-center">
+            Väitä arvoa • Bluffaa • Haasta
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
