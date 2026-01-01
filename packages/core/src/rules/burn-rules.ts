@@ -101,3 +101,5 @@ export function isBurnRank(rank: Rank): boolean {
   return rank === '10' || rank === 'A';
 }
 
+
+

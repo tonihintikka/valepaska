@@ -1,4 +1,4 @@
-import type { Card } from './card.js';
+import type { Card, Rank } from './card.js';
 import type { ClaimRecord } from './claim.js';
 import type { Player, PlayerId } from './player.js';
 
@@ -49,7 +49,7 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
 export interface LastPlay {
   readonly playerId: PlayerId;
   readonly cards: readonly Card[];
-  readonly claimRank: string;
+  readonly claimRank: Rank;
   readonly claimCount: number;
 }
 

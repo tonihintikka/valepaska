@@ -108,3 +108,5 @@ Feature: Burn (Table Clear)
     Then player 1 can claim any rank including "3"
     And there should be no last claim restriction
 
+
+

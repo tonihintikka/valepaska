@@ -34,9 +34,22 @@ export function createObservation(
   });
 
   // Get last claim
-  const lastClaim = state.claimHistory.length > 0 
-    ? state.claimHistory[state.claimHistory.length - 1] ?? null
-    : null;
+  let lastClaim: ClaimRecord | null = null;
+
+  // If we are waiting for challenges, the "last claim" is the current pending play
+  if (state.phase === 'WAITING_FOR_CHALLENGES' && state.lastPlay) {
+    lastClaim = {
+      playerId: state.lastPlay.playerId,
+      rank: state.lastPlay.claimRank,
+      count: state.lastPlay.claimCount,
+      timestamp: Date.now(),
+      accepted: false,
+    };
+  }
+  // Otherwise it's the last accepted claim from history
+  else if (state.claimHistory.length > 0) {
+    lastClaim = state.claimHistory[state.claimHistory.length - 1] ?? null;
+  }
 
   // Get player order
   const playerOrder = state.players.map((p) => p.id);
