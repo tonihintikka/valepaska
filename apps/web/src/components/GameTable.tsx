@@ -35,7 +35,7 @@ export function GameTable() {
     <div className="relative w-full h-full felt-texture overflow-hidden">
       {/* Watermark logo - embossed into the felt */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <div className="text-emerald-800/20 text-4xl sm:text-6xl font-serif font-bold tracking-widest rotate-[-5deg] uppercase">
+        <div className="text-black/10 text-5xl sm:text-7xl font-serif font-bold tracking-[0.3em] rotate-[-8deg] uppercase drop-shadow-sm">
           Valepaska
         </div>
       </div>
@@ -199,9 +199,9 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
               <div className="text-sm font-medium text-white">{name}</div>
               {isFinished && standing && (
                 <span className={`text-xs font-bold ${standing.position === 1 ? 'text-accent-gold' :
-                    standing.position === 2 ? 'text-slate-300' :
-                      standing.position === 3 ? 'text-amber-600' :
-                        'text-slate-500'
+                  standing.position === 2 ? 'text-slate-300' :
+                    standing.position === 3 ? 'text-amber-600' :
+                      'text-slate-500'
                   }`}>
                   {standing.position === 1 ? '🏆' :
                     standing.position === 2 ? '🥈' :
