@@ -60,6 +60,9 @@ export class GameEngine {
     this.bots = new Map();
     this.botRunner = new BotRunner();
 
+    // Randomize starting player
+    const startingPlayerIndex = this.rng.randomInt(0, players.length);
+
     // Initialize state
     this.state = {
       phase: 'WAITING_FOR_PLAY',
@@ -69,7 +72,7 @@ export class GameEngine {
       tablePile: [],
       burnPile: [],
       claimHistory: [],
-      currentPlayerIndex: 0,
+      currentPlayerIndex: startingPlayerIndex,
       lastPlay: null,
       config,
       seed,

@@ -289,8 +289,8 @@ export const useGameStore = create<GameStore>()(
       
       // If waiting for challenges (for human player only)
       if (state.phase === 'WAITING_FOR_CHALLENGES' && !isSpectator) {
-        // For human player, show quick challenge window
-        set({ showChallengeModal: true, challengeTimeLeft: 2 });
+        // For human player, show challenge window with enough time to react
+        set({ showChallengeModal: true, challengeTimeLeft: 5 });
         
         const timer = setInterval(() => {
           const { challengeTimeLeft, showChallengeModal, engine: eng, humanPlayerId: hpId } = get();
@@ -321,7 +321,7 @@ export const useGameStore = create<GameStore>()(
           }
           
           set({ challengeTimeLeft: challengeTimeLeft - 1 });
-        }, 500); // Faster countdown
+        }, 1000); // 1 second countdown for human-friendly timing
         
         return;
       }

@@ -33,8 +33,12 @@ export function PlayerHand() {
     return suitOrder.indexOf(a.suit) - suitOrder.indexOf(b.suit);
   });
 
+  // Calculate overlap based on hand size for mobile responsiveness
+  const cardCount = sortedHand.length;
+  const baseOverlap = cardCount > 8 ? -20 : cardCount > 6 ? -16 : -12;
+
   return (
-    <div className="bg-bg-surface/80 backdrop-blur-sm border-t border-slate-700/50 px-4 py-4">
+    <div className="bg-bg-surface/80 backdrop-blur-sm border-t border-slate-700/50 px-2 sm:px-4 py-3 sm:py-4">
       <div className="max-w-4xl mx-auto">
         {/* Hand label */}
         <div className="text-xs text-slate-400 mb-2 text-center">
@@ -46,40 +50,44 @@ export function PlayerHand() {
           )}
         </div>
 
-        {/* Cards */}
-        <div className="flex justify-center items-end gap-1 min-h-[120px]">
-          <AnimatePresence mode="popLayout">
-            {sortedHand.map((card, index) => {
-              const isSelected = selectedCards.includes(card.id);
-              const centerOffset = index - (sortedHand.length - 1) / 2;
-              
-              return (
-                <motion.div
-                  key={card.id}
-                  layout
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: isSelected ? -16 : 0,
-                    rotate: centerOffset * 2,
-                  }}
-                  exit={{ opacity: 0, y: 50, scale: 0.8 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  style={{
-                    marginLeft: index === 0 ? 0 : '-12px',
-                    zIndex: isSelected ? 100 : index,
-                  }}
-                >
-                  <Card
-                    card={card}
-                    selected={isSelected}
-                    disabled={!canPlay}
-                    onClick={() => handleCardClick(card.id)}
-                  />
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+        {/* Cards - responsive container */}
+        <div className="flex justify-center items-end min-h-[100px] sm:min-h-[120px] overflow-x-auto overflow-y-visible pb-2 scrollbar-hide">
+          <div className="flex items-end px-4">
+            <AnimatePresence mode="popLayout">
+              {sortedHand.map((card, index) => {
+                const isSelected = selectedCards.includes(card.id);
+                const centerOffset = index - (sortedHand.length - 1) / 2;
+                
+                return (
+                  <motion.div
+                    key={card.id}
+                    layout
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: isSelected ? -16 : 0,
+                      rotate: centerOffset * 1.5,
+                    }}
+                    exit={{ opacity: 0, y: 50, scale: 0.8 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="flex-shrink-0"
+                    style={{
+                      marginLeft: index === 0 ? 0 : `${baseOverlap}px`,
+                      zIndex: isSelected ? 100 : index,
+                    }}
+                  >
+                    <Card
+                      card={card}
+                      selected={isSelected}
+                      disabled={!canPlay}
+                      onClick={() => handleCardClick(card.id)}
+                      size={cardCount > 8 ? 'sm' : 'md'}
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Empty state */}

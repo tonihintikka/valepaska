@@ -180,5 +180,15 @@
   .text-shadow-gold {
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
   }
+  
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
