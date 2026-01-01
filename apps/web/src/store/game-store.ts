@@ -216,6 +216,9 @@ export const useGameStore = create<GameStore>()(
       const lastPlayerId = state.lastPlay?.playerId;
       if (lastPlayerId === humanPlayerId) return; // Can't challenge own play
 
+      // Finished players can't challenge
+      if (!state.activePlayerIds.includes(humanPlayerId)) return;
+
       // Human challenges the last claim
       engine.submitChallengeDecision(humanPlayerId, true);
 
@@ -243,8 +246,11 @@ export const useGameStore = create<GameStore>()(
       const state = engine.getState();
       const lastPlayerId = state.lastPlay?.playerId;
 
-      // Only submit decision if human didn't make the last play
-      if (lastPlayerId !== humanPlayerId) {
+      // Finished players don't need to submit decisions
+      const humanIsActive = state.activePlayerIds.includes(humanPlayerId);
+
+      // Only submit decision if human didn't make the last play AND is still active
+      if (lastPlayerId !== humanPlayerId && humanIsActive) {
         engine.submitChallengeDecision(humanPlayerId, false);
       }
 
@@ -312,9 +318,12 @@ export const useGameStore = create<GameStore>()(
       if (state.phase === 'WAITING_FOR_CHALLENGES' && !isSpectator) {
         const lastPlayerId = state.lastPlay?.playerId;
 
-        // Only show challenge modal if it's NOT human's own play
-        // (human's own play is handled in playCards())
-        if (lastPlayerId !== humanPlayerId) {
+        // Only show challenge modal if:
+        // 1. It's NOT human's own play (human's own play is handled in playCards())
+        // 2. Human is still active (finished players can't challenge)
+        const humanCanChallenge = humanPlayerId && humanIsActive && lastPlayerId !== humanPlayerId;
+        
+        if (humanCanChallenge) {
           // Clear any existing timer before starting a new one
           clearChallengeTimer();
 
@@ -333,9 +342,12 @@ export const useGameStore = create<GameStore>()(
             if (challengeTimeLeft <= 0) {
               clearChallengeTimer();
 
-              // Human passes (timeout)
+              // Human passes (timeout) - only if still active
               if (hpId) {
-                eng.submitChallengeDecision(hpId, false);
+                const timerState = eng.getState();
+                if (timerState.activePlayerIds.includes(hpId)) {
+                  eng.submitChallengeDecision(hpId, false);
+                }
               }
               get().processBotChallenges();
               eng.processChallenges();
@@ -352,7 +364,7 @@ export const useGameStore = create<GameStore>()(
 
           return;
         } else {
-          // It's human's own play - bots decide and process
+          // Human can't challenge (own play or finished) - bots decide and process
           get().processBotChallenges();
           engine.processChallenges();
           get().updateObservation();
