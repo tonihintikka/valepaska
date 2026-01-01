@@ -4,6 +4,25 @@ A TypeScript-based card game engine for "Valepaska" (Finnish Bullshit), a bluffi
 
 ![Valepaska Screenshot](docs/screenshot.png)
 
+> **🚀 AI-Assisted Development Showcase**
+>
+> This project demonstrates what's possible with modern AI coding assistants in 2025. The entire codebase — including a production-ready game engine, intelligent AI bots, comprehensive test suite, and polished web UI — was developed from idea to deployment in **under 3 days** using [Cursor](https://cursor.sh) with Claude.
+>
+> **Project Statistics:**
+> | Category | Lines of Code |
+> |----------|---------------|
+> | Core Engine (`@valepaska/core`) | ~3,400 |
+> | Core Tests | ~2,700 |
+> | AI Bots (`@valepaska/bots`) | ~790 |
+> | Simulator (`@valepaska/simulator`) | ~380 |
+> | Web UI (`apps/web`) | ~3,800 |
+> | **Total TypeScript/TSX** | **~11,200** |
+> | Documentation (Markdown) | ~2,000 |
+> | BDD Feature Specs | ~1,500 |
+> | CSS Styling | ~270 |
+>
+> **Test Coverage:** 200 tests across 15 test files, all passing ✅
+
 ## Features
 
 - **Game Engine** (`@valepaska/core`): Deterministic game engine with seeded RNG
@@ -11,6 +30,19 @@ A TypeScript-based card game engine for "Valepaska" (Finnish Bullshit), a bluffi
 - **Simulator** (`@valepaska/simulator`): CLI tool to run thousands of games for analysis
 - **Full Event Log**: Complete game history for UI and testing
 - **Hidden Information**: Proper separation of game state and player observations
+
+## Technology Stack
+
+| Category | Technology |
+|----------|------------|
+| Runtime | Node.js 22 LTS |
+| Language | TypeScript 5.7 (strict mode) |
+| Build | Vite 6 |
+| Testing | Vitest |
+| Web UI | React 19 + Tailwind CSS 4 + Framer Motion 12 |
+| State | Zustand 5 |
+| Monorepo | pnpm workspaces + TypeScript Project References |
+| Deployment | Vercel |
 
 ## Quick Start
 
@@ -106,18 +138,38 @@ valepaska/
 └── README.md
 ```
 
-### Recent Refactoring
+### Web UI
 
-The game engine has been modularized (2025-01-27) for better maintainability:
+The project includes a fully playable web application with:
+- **Nordic Noir Casino** design theme (dark mode)
+- Real-time bot opponents with 4 difficulty levels
+- Card animations with Framer Motion
+- Challenge reveal overlays with dramatic effects
+- Victory celebrations and standings
+- PWA support for offline play
+- Responsive design
+
+```bash
+# Start development server
+pnpm dev
+
+# Build for production
+pnpm build
+```
+
+### Recent Updates (January 2025)
+
+**Engine Modularization:**
 - `game-engine.ts` reduced from 770 to 550 lines (-29%)
 - Split into 6 focused modules (turn-manager, hand-manager, play-executor, challenge-executor, burn-executor, bot-runner)
-- All tests passing, public API unchanged
-- See `CHANGELOG.md` and `docs/MODULARIZATION_PLAN.md` for details
+- See `docs/MODULARIZATION_PLAN.md` for details
 
-### Recent Fixes (2025-01-01)
-- Fixed specific turn management issues in `core` tests.
-- Verified and fixed web UI challenge flow logic.
-- Resolved build issues in `web` app.
+**Bug Fixes & Improvements:**
+- Fixed game freezing when bot wins
+- Fixed winner continuing to play after finishing
+- Added validation: finished players cannot challenge
+- TypeScript Project References for monorepo
+- Strict type checking with `exactOptionalPropertyTypes`
 
 
 ## Development
