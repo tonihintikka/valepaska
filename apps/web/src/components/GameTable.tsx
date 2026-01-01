@@ -32,49 +32,52 @@ export function GameTable() {
   const lastClaim = observation.lastClaim;
 
   return (
-    <div className="relative w-full h-full felt-texture">
+    <div className="relative w-full h-full felt-texture overflow-hidden">
       {/* Table edge glow */}
       <div className="absolute inset-4 rounded-3xl border border-emerald-700/30 pointer-events-none" />
       <div className="absolute inset-8 rounded-2xl border border-emerald-600/20 pointer-events-none" />
 
       {/* Center pile area */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
-        {/* Table pile */}
-        <div className="relative">
-          {observation.tablePileSize > 0 ? (
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8">
+        {/* Table pile and claim info */}
+        <div className="flex flex-col items-center gap-4">
+          {/* Table pile */}
+          <div className="relative">
+            {observation.tablePileSize > 0 ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', bounce: 0.3 }}
+              >
+                <PileCard count={observation.tablePileSize} />
+              </motion.div>
+            ) : (
+              <div className="w-20 h-28 rounded-lg border-2 border-dashed border-emerald-600/30 flex items-center justify-center">
+                <span className="text-emerald-600/50 text-sm">Pöytä</span>
+              </div>
+            )}
+          </div>
+
+          {/* Last claim display */}
+          {lastClaim && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', bounce: 0.3 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass rounded-lg px-4 py-2 text-center"
             >
-              <PileCard count={observation.tablePileSize} />
+              <div className="text-xs text-slate-400 mb-1">Viimeisin väite</div>
+              <div className="text-lg font-bold text-accent-gold">
+                {lastClaim.count}× {lastClaim.rank}
+              </div>
+              <div className="text-xs text-slate-400">
+                {playerConfigs.find((p) => p.id === lastClaim.playerId)?.name ?? 'Tuntematon'}
+              </div>
             </motion.div>
-          ) : (
-            <div className="w-20 h-28 rounded-lg border-2 border-dashed border-emerald-600/30 flex items-center justify-center">
-              <span className="text-emerald-600/50 text-sm">Pöytä</span>
-            </div>
           )}
         </div>
 
-        {/* Last claim display */}
-        {lastClaim && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass rounded-lg px-4 py-2 text-center"
-          >
-            <div className="text-xs text-slate-400 mb-1">Viimeisin väite</div>
-            <div className="text-lg font-bold text-accent-gold">
-              {lastClaim.count}× {lastClaim.rank}
-            </div>
-            <div className="text-xs text-slate-400">
-              {playerConfigs.find((p) => p.id === lastClaim.playerId)?.name ?? 'Tuntematon'}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Draw pile */}
-        <div className="absolute -right-32 top-1/2 -translate-y-1/2">
+        {/* Draw pile - now part of flex layout, not absolute */}
+        <div className="flex flex-col items-center">
           {observation.drawPileSize > 0 ? (
             <div className="relative">
               <PileCard count={observation.drawPileSize} />

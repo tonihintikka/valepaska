@@ -164,7 +164,7 @@ export function StartScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="glass rounded-xl p-3 mb-3"
+          className="glass rounded-xl p-3 mb-3 overflow-hidden"
         >
           <h2 className="text-base font-semibold text-white mb-2 flex items-center gap-2">
             <span>Pelaajat</span>
@@ -181,7 +181,7 @@ export function StartScreen() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`flex items-center gap-3 p-2 rounded-lg transition-all ${slot.enabled
+                  className={`flex flex-wrap items-center gap-2 p-2 rounded-lg transition-all ${slot.enabled
                     ? 'bg-bg-elevated'
                     : 'bg-bg-surface/50 opacity-50'
                     }`}
@@ -189,7 +189,7 @@ export function StartScreen() {
                   {/* Enable checkbox */}
                   <button
                     onClick={() => updateSlot(index, { enabled: !slot.enabled })}
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${slot.enabled
+                    className={`w-6 h-6 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${slot.enabled
                       ? 'bg-accent-gold border-accent-gold text-bg-deep'
                       : 'border-slate-600 text-transparent hover:border-slate-500'
                       }`}
@@ -198,7 +198,7 @@ export function StartScreen() {
                   </button>
 
                   {/* Avatar */}
-                  <span className="text-xl w-8 text-center">
+                  <span className="text-lg shrink-0">
                     {slot.isHuman ? '👤' : '🤖'}
                   </span>
 
@@ -208,12 +208,12 @@ export function StartScreen() {
                     value={slot.name}
                     onChange={(e) => updateSlot(index, { name: e.target.value })}
                     disabled={!slot.enabled}
-                    className="flex-1 bg-transparent text-white text-sm px-2 py-1 rounded border border-transparent focus:border-slate-600 focus:outline-none disabled:text-slate-500"
+                    className="flex-1 min-w-[80px] max-w-[120px] bg-transparent text-white text-sm px-2 py-1 rounded border border-transparent focus:border-slate-600 focus:outline-none disabled:text-slate-500"
                     placeholder={`Pelaaja ${index + 1}`}
                   />
 
                   {/* Type toggle */}
-                  <div className="flex rounded-lg overflow-hidden">
+                  <div className="flex rounded-lg overflow-hidden shrink-0">
                     <button
                       onClick={() => updateSlot(index, { isHuman: true })}
                       disabled={!slot.enabled || (humanCount >= 1 && !slot.isHuman)}
@@ -222,7 +222,7 @@ export function StartScreen() {
                         : 'bg-bg-surface text-slate-400 hover:text-white disabled:opacity-50'
                         }`}
                     >
-                      Ihminen
+                      👤
                     </button>
                     <button
                       onClick={() => updateSlot(index, { isHuman: false })}
@@ -232,7 +232,7 @@ export function StartScreen() {
                         : 'bg-bg-surface text-slate-400 hover:text-white'
                         }`}
                     >
-                      Botti
+                      🤖
                     </button>
                   </div>
 
@@ -242,7 +242,7 @@ export function StartScreen() {
                       value={slot.difficulty}
                       onChange={(e) => updateSlot(index, { difficulty: e.target.value as BotDifficulty })}
                       disabled={!slot.enabled}
-                      className="bg-bg-surface text-slate-300 text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none focus:border-slate-500 disabled:opacity-50"
+                      className="bg-bg-surface text-slate-300 text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none focus:border-slate-500 disabled:opacity-50 shrink-0 w-[72px]"
                     >
                       {DIFFICULTIES.map(d => (
                         <option key={d} value={d}>{d}</option>
