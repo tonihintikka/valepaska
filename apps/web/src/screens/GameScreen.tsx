@@ -34,26 +34,26 @@ export function GameScreen() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-bg-deep overflow-hidden">
+    <div className="h-[100dvh] w-screen flex flex-col bg-bg-deep overflow-hidden fixed inset-0">
       {/* Spectator mode banner */}
       {isSpectator && (
-        <div className="bg-accent-ice/20 text-accent-ice text-center py-2 text-sm">
+        <div className="bg-accent-ice/20 text-accent-ice text-center py-2 text-sm shrink-0">
           👁️ Katselutila - Seuraat bottien peliä
         </div>
       )}
 
       {/* Main game area */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative min-h-0 w-full">
         <GameTable />
-        
+
         {/* Logo in top-left corner */}
-        <div className="absolute top-3 left-4 z-20">
+        <div className="absolute top-safe-top left-4 z-20 pt-2">
           <Logo size="sm" variant="light" showTitle={false} animate={false} />
         </div>
-        
+
         {/* Event log overlay (only if not in debug mode) */}
         {!debugMode && (
-          <div className="absolute top-4 right-4 z-20">
+          <div className="absolute top-safe-top right-4 z-20 pt-2">
             <EventLog />
           </div>
         )}
@@ -61,7 +61,7 @@ export function GameScreen() {
 
       {/* Player's hand and actions (only if not spectator) */}
       {!isSpectator && (
-        <div className="relative z-10">
+        <div className="relative z-10 w-full shrink-0 flex flex-col pb-safe-bottom">
           <PlayerHand />
           <ActionBar />
         </div>
@@ -120,7 +120,7 @@ export function GameScreen() {
       {showVictoryOverlay && pendingWinnerId && (() => {
         const winner = playerConfigs.find((p) => p.id === pendingWinnerId);
         if (!winner) return null;
-        
+
         return (
           <VictoryOverlay
             winnerName={winner.name}
