@@ -93,34 +93,40 @@ describe('GameEngine', () => {
     });
 
     it('should accept valid move', () => {
-      const obs = engine.getObservation('p1');
+      const currentPlayer = engine.getCurrentPlayer();
+      const obs = engine.getObservation(currentPlayer.id);
       const cardToPlay = obs.hand[0]!;
       
       // First claim must be a number card (3-10), so we claim '7' (may be a lie)
-      const move = createPlayMove('p1', [cardToPlay.id], '7');
-      engine.submitMove('p1', move);
+      const move = createPlayMove(currentPlayer.id, [cardToPlay.id], '7');
+      engine.submitMove(currentPlayer.id, move);
 
       expect(engine.getCurrentPhase()).toBe('WAITING_FOR_CHALLENGES');
     });
 
     it('should reject move from wrong player', () => {
-      const obs = engine.getObservation('p2');
+      const currentPlayer = engine.getCurrentPlayer();
+      // Find a player who is NOT the current player
+      const wrongPlayer = players.find(p => p.id !== currentPlayer.id)!;
+      
+      const obs = engine.getObservation(wrongPlayer.id);
       const cardToPlay = obs.hand[0]!;
       
-      const move = createPlayMove('p2', [cardToPlay.id], cardToPlay.rank);
-      expect(() => engine.submitMove('p2', move)).toThrow("Not player's turn");
+      const move = createPlayMove(wrongPlayer.id, [cardToPlay.id], cardToPlay.rank);
+      expect(() => engine.submitMove(wrongPlayer.id, move)).toThrow("Not player's turn");
     });
 
     it('should emit PLAY_MADE event', () => {
       const events: GameEvent[] = [];
       engine.onAll((e) => events.push(e));
 
-      const obs = engine.getObservation('p1');
+      const currentPlayer = engine.getCurrentPlayer();
+      const obs = engine.getObservation(currentPlayer.id);
       const cardToPlay = obs.hand[0]!;
       
       // First claim must be a number card (3-10)
-      const move = createPlayMove('p1', [cardToPlay.id], '7');
-      engine.submitMove('p1', move);
+      const move = createPlayMove(currentPlayer.id, [cardToPlay.id], '7');
+      engine.submitMove(currentPlayer.id, move);
 
       const playEvent = events.find((e) => e.type === 'PLAY_MADE');
       expect(playEvent).toBeDefined();
@@ -132,27 +138,48 @@ describe('GameEngine', () => {
 
     beforeEach(() => {
       engine = GameEngine.create(players, {}, 12345);
-      const obs = engine.getObservation('p1');
+      
+      const currentPlayer = engine.getCurrentPlayer();
+      const obs = engine.getObservation(currentPlayer.id);
       const cardToPlay = obs.hand[0]!;
       // First claim must be a number card (3-10)
-      const move = createPlayMove('p1', [cardToPlay.id], '7');
-      engine.submitMove('p1', move);
+      const move = createPlayMove(currentPlayer.id, [cardToPlay.id], '7');
+      engine.submitMove(currentPlayer.id, move);
     });
 
     it('should accept challenge from other player', () => {
-      engine.submitChallengeDecision('p2', true);
+      const currentPlayerId = engine.getCurrentPlayer().id; // Note: turn doesn't advance until challenge resolved
+      // Actually, after play, the turn stays with current player until challenge phase done.
+      // But we need to find someone who is NOT the one who played.
+      // In `beforeEach`, `currentPlayer` made the move.
+      // We need to fetch the player who made the move from the state/lastPlay?
+      // Or just re-derive:
+      
+      // Since we just created the engine with same seed in beforeEach, let's just use a known "other"
+      // But wait, `currentPlayer` advanced? No, phase is WAITING_FOR_CHALLENGES.
+      // The `lastPlay` was by the player who started.
+      
+      // The `engine.getCurrentPlayer()` returns the player whose turn it IS or WAS?
+      // State check: currentPlayerIndex usually points to the one who just played if we rely on advanceTurn happening AFTER challenges.
+      // Let's assume currentPlayer is the one who played.
+      const accuser = engine.getCurrentPlayer();
+      const challenger = players.find(p => p.id !== accuser.id)!;
+      
+      engine.submitChallengeDecision(challenger.id, true);
       // Should not throw
     });
 
     it('should reject challenge from same player', () => {
-      expect(() => engine.submitChallengeDecision('p1', true))
+      const accuser = engine.getCurrentPlayer();
+      expect(() => engine.submitChallengeDecision(accuser.id, true))
         .toThrow('Cannot challenge your own');
     });
 
     it('should process challenges correctly', () => {
-      engine.submitChallengeDecision('p2', false);
-      engine.submitChallengeDecision('p3', false);
-      engine.submitChallengeDecision('p4', false);
+      const accuser = engine.getCurrentPlayer();
+      const others = players.filter(p => p.id !== accuser.id);
+      
+      others.forEach(p => engine.submitChallengeDecision(p.id, false));
       engine.processChallenges();
 
       // Should advance to next player since no one challenged

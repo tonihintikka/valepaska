@@ -30,7 +30,7 @@ function clearChallengeTimer() {
 }
 
 // Combined store interface
-export interface GameStore extends 
+export interface GameStore extends
   GameStateSlice,
   PlayerSlice,
   UISlice,
@@ -40,12 +40,12 @@ export interface GameStore extends
   // Game actions
   startGame: (config: GameConfig) => void;
   resetGame: () => void;
-  
+
   // Human actions
   playCards: () => void;
   challenge: () => void;
   pass: () => void;
-  
+
   // Internal
   updateObservation: () => void;
   processBotTurn: () => void;
@@ -62,7 +62,7 @@ export const useGameStore = create<GameStore>()(
     ...createEventSlice(set, get, api),
     ...createBotSlice(set, get, api),
     ...createDebugSlice(set, get, api),
-    
+
     // Game actions
     startGame: (config: GameConfig) => {
       // Create player objects for the engine
@@ -73,15 +73,15 @@ export const useGameStore = create<GameStore>()(
           return createBotPlayer(p.id, p.name, p.botDifficulty ?? 'Normal');
         }
       });
-      
+
       // Create the engine
       const engine = GameEngine.create(players, {}, config.seed ?? Date.now());
-      
+
       // Create bots for ALL non-human players
       const bots = new Map<PlayerId, RuleBot>();
       const humanPlayer = config.players.find(p => p.isHuman);
       const isSpectator = !humanPlayer; // No human = spectator mode
-      
+
       for (const player of config.players) {
         if (!player.isHuman) {
           const difficulty = player.botDifficulty ?? 'Normal';
@@ -91,20 +91,20 @@ export const useGameStore = create<GameStore>()(
           engine.registerBot(player.id, bot);
         }
       }
-      
+
       // Subscribe to all events
       engine.onAll((event: GameEvent) => {
         get().handleEvent(event);
       });
-      
+
       const humanPlayerId = humanPlayer?.id ?? null;
-      
+
       // In spectator mode, observe from first player's perspective
       const observePlayerId = humanPlayerId ?? config.players[0]?.id ?? null;
-      const observation = observePlayerId 
-        ? engine.getObservation(observePlayerId) 
+      const observation = observePlayerId
+        ? engine.getObservation(observePlayerId)
         : null;
-      
+
       set({
         uiPhase: 'playing',
         engine,
@@ -122,16 +122,16 @@ export const useGameStore = create<GameStore>()(
         debugMode: config.debugMode ?? false,
         isSpectator,
       });
-      
+
       // Start the game - bots will play automatically
       const { gameSpeed } = get();
       setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
-    
+
     resetGame: () => {
       // Clear any active challenge timer
       clearChallengeTimer();
-      
+
       set({
         uiPhase: 'start',
         engine: null,
@@ -156,197 +156,197 @@ export const useGameStore = create<GameStore>()(
         gameSpeed: 1,
       });
     },
-    
+
     playCards: () => {
       const { engine, humanPlayerId, selectedCards, selectedRank } = get();
       if (!engine || !humanPlayerId || selectedCards.length === 0 || !selectedRank) {
         return;
       }
-      
+
       // Clear any existing challenge timer
       clearChallengeTimer();
-      
+
       const move = createPlayMove(humanPlayerId, selectedCards, selectedRank, selectedCards.length);
       engine.submitMove(humanPlayerId, move);
-      
-      set({ 
-        selectedCards: [], 
+
+      set({
+        selectedCards: [],
         selectedRank: null,
         showChallengeModal: true,
         challengeTimeLeft: 5,
       });
-      
+
       get().updateObservation();
-      
+
       // Start challenge window timer for human's own play
       activeChallengeTimer = setInterval(() => {
-        const { challengeTimeLeft, showChallengeModal, engine: eng, humanPlayerId: hpId } = get();
+        const { challengeTimeLeft, showChallengeModal, engine: eng } = get();
         if (!showChallengeModal || !eng) {
           clearChallengeTimer();
           return;
         }
-        
+
         if (challengeTimeLeft <= 0) {
           clearChallengeTimer();
-          
+
           // Bots decide whether to challenge human's play
           get().processBotChallenges();
           eng.processChallenges();
-          
+
           set({ showChallengeModal: false });
           get().updateObservation();
           const { gameSpeed } = get();
           setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
           return;
         }
-        
+
         set({ challengeTimeLeft: challengeTimeLeft - 1 });
       }, 1000);
     },
-    
+
     challenge: () => {
       const { engine, humanPlayerId, observation } = get();
       if (!engine || !humanPlayerId || !observation) return;
-      
+
       // Clear the challenge timer immediately
       clearChallengeTimer();
-      
+
       // Check who made the last play - can't challenge yourself
       const state = engine.getState();
       const lastPlayerId = state.lastPlay?.playerId;
       if (lastPlayerId === humanPlayerId) return; // Can't challenge own play
-      
+
       // Human challenges the last claim
       engine.submitChallengeDecision(humanPlayerId, true);
-      
+
       // Other players pass (except the one who played)
       get().processBotChallenges();
-      
+
       // Process challenges and resolve
       engine.processChallenges();
-      
+
       set({ showChallengeModal: false });
       get().updateObservation();
-      
+
       const { gameSpeed } = get();
       setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
-    
+
     pass: () => {
       const { engine, humanPlayerId } = get();
       if (!engine || !humanPlayerId) return;
-      
+
       // Clear the challenge timer immediately
       clearChallengeTimer();
-      
+
       // Check who made the last play
       const state = engine.getState();
       const lastPlayerId = state.lastPlay?.playerId;
-      
+
       // Only submit decision if human didn't make the last play
       if (lastPlayerId !== humanPlayerId) {
         engine.submitChallengeDecision(humanPlayerId, false);
       }
-      
+
       // Other players decide
       get().processBotChallenges();
-      
+
       // Process all challenge decisions and advance game
       engine.processChallenges();
-      
+
       set({ showChallengeModal: false });
       get().updateObservation();
-      
+
       const { gameSpeed } = get();
       setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
     },
-    
+
     updateObservation: () => {
       const { engine, humanPlayerId, isSpectator } = get();
       if (!engine) return;
-      
+
       // Store full game state for spectator mode
       if (isSpectator) {
         const gameState = engine.getState();
         set({ gameState });
       }
-      
+
       // In spectator mode, observe from current player's perspective
-      const observeId = isSpectator 
-        ? engine.getCurrentPlayer().id 
+      const observeId = isSpectator
+        ? engine.getCurrentPlayer().id
         : humanPlayerId;
-      
+
       if (!observeId) return;
-      
+
       const observation = engine.getObservation(observeId);
       set({ observation });
     },
-    
+
     processBotTurn: () => {
       const { engine, humanPlayerId, uiPhase, isSpectator, showChallengeModal } = get();
       if (!engine || uiPhase !== 'playing') return;
-      
+
       // Don't process if challenge modal is already showing
       if (showChallengeModal) return;
-      
+
       const state = engine.getState();
       if (state.phase === 'GAME_OVER') {
         set({ uiPhase: 'gameOver' });
         return;
       }
-      
+
       const currentPlayer = state.players[state.currentPlayerIndex];
       if (!currentPlayer) return;
       const currentPlayerId = currentPlayer.id;
-      
+
       // If it's human's turn and not spectator, don't process
       if (currentPlayerId === humanPlayerId && !isSpectator) {
         get().updateObservation();
         return;
       }
-      
+
       // If waiting for challenges - show modal to human FIRST before bots decide
       if (state.phase === 'WAITING_FOR_CHALLENGES' && !isSpectator) {
         const lastPlayerId = state.lastPlay?.playerId;
-        
+
         // Only show challenge modal if it's NOT human's own play
         // (human's own play is handled in playCards())
         if (lastPlayerId !== humanPlayerId) {
           // Clear any existing timer before starting a new one
           clearChallengeTimer();
-          
+
           // Set modal visible
           set({ showChallengeModal: true, challengeTimeLeft: 5 });
-          
+
           // Start countdown timer
           activeChallengeTimer = setInterval(() => {
             const { challengeTimeLeft, showChallengeModal: modalShowing, engine: eng, humanPlayerId: hpId } = get();
-            
+
             if (!modalShowing || !eng) {
               clearChallengeTimer();
               return;
             }
-            
+
             if (challengeTimeLeft <= 0) {
               clearChallengeTimer();
-              
+
               // Human passes (timeout)
               if (hpId) {
                 eng.submitChallengeDecision(hpId, false);
               }
               get().processBotChallenges();
               eng.processChallenges();
-              
+
               set({ showChallengeModal: false });
               get().updateObservation();
               const { gameSpeed } = get();
               setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
               return;
             }
-            
+
             set({ challengeTimeLeft: challengeTimeLeft - 1 });
           }, 1000);
-          
+
           return;
         } else {
           // It's human's own play - bots decide and process
@@ -358,32 +358,32 @@ export const useGameStore = create<GameStore>()(
           return;
         }
       }
-      
+
       // Bot's turn to play - make ONE move only, then check for challenges
       const { gameSpeed } = get();
       setTimeout(() => {
         const { engine: eng, uiPhase: phase, showChallengeModal: modalUp } = get();
         if (!eng || phase !== 'playing' || modalUp) return;
-        
+
         const currentState = eng.getState();
         if (currentState.phase === 'GAME_OVER') {
           set({ uiPhase: 'gameOver' });
           return;
         }
-        
+
         // Only process if it's a bot's turn to PLAY (not challenge phase)
         if (currentState.phase !== 'WAITING_FOR_PLAY') {
           // Shouldn't happen, but recurse to handle
           get().processBotTurn();
           return;
         }
-        
+
         const player = currentState.players[currentState.currentPlayerIndex];
         if (!player || player.id === humanPlayerId) {
           get().updateObservation();
           return;
         }
-        
+
         // Bot makes a play
         const { bots } = get();
         const bot = bots.get(player.id);
@@ -392,9 +392,9 @@ export const useGameStore = create<GameStore>()(
           const move = bot.chooseMove(observation);
           eng.submitMove(player.id, move);
         }
-        
+
         get().updateObservation();
-        
+
         // Now check if we need to show challenge modal
         const afterPlayState = eng.getState();
         if (afterPlayState.phase === 'WAITING_FOR_CHALLENGES') {
@@ -408,37 +408,37 @@ export const useGameStore = create<GameStore>()(
         }
       }, Math.max(50, 200 / gameSpeed));
     },
-    
+
     processBotChallenges: () => {
       const { engine, humanPlayerId, bots } = get();
       if (!engine) return;
-      
+
       const state = engine.getState();
       if (state.phase !== 'WAITING_FOR_CHALLENGES') return;
-      
+
       // Who made the last play? They can't challenge themselves
       const lastPlayerId = state.lastPlay?.playerId;
-      
+
       // All bots submit their challenge decisions (except the one who played, and finished players)
       for (const [botId, bot] of bots) {
         if (botId === humanPlayerId) continue;
         if (botId === lastPlayerId) continue; // Can't challenge own play
         if (!state.activePlayerIds.includes(botId)) continue; // Finished players can't challenge
-        
+
         const botObs = engine.getObservation(botId);
         const lastClaim = botObs.lastClaim;
-        const shouldChallenge = lastClaim 
-          ? bot.shouldChallenge(botObs, lastClaim.rank, lastClaim.count) 
+        const shouldChallenge = lastClaim
+          ? bot.shouldChallenge(botObs, lastClaim.rank, lastClaim.count)
           : false;
-        
+
         engine.submitChallengeDecision(botId, shouldChallenge);
       }
     },
-    
+
     handleEvent: (event: GameEvent) => {
       const { isSpectator } = get();
       get().addEvent(event);
-      
+
       if (event.type === 'PLAYER_FINISHED') {
         // Update standings when a player finishes
         const { standings } = get();
@@ -449,33 +449,33 @@ export const useGameStore = create<GameStore>()(
           finishedAtRound: event.finishedAtRound,
         };
         get().setStandings([...standings, newStanding]);
-        
+
         // Show victory overlay for first place (winner)
         if (event.position === 1) {
           get().setShowVictoryOverlay(true);
           get().setPendingWinnerId(event.playerId);
           get().setWinnerId(event.playerId);
-          set({ 
+          set({
             showChallengeModal: false,
             activeChallenge: null,
             challengeReveal: null,
           });
         }
       }
-      
+
       // PLAYER_WON is deprecated, handled by PLAYER_FINISHED + GAME_OVER
-      
+
       if (event.type === 'GAME_OVER') {
         // Update standings from final event
         if (event.standings && event.standings.length > 0) {
           get().setStandings([...event.standings]);
         }
         get().setWinnerId(event.winnerId || null);
-        
+
         // NOW transition to game over screen (all players finished)
         set({ uiPhase: 'gameOver' });
       }
-      
+
       // Show challenge indicator in spectator mode
       if (event.type === 'CHALLENGE_DECLARED' && isSpectator) {
         set({
@@ -484,19 +484,19 @@ export const useGameStore = create<GameStore>()(
             accusedId: event.accusedId,
           },
         });
-        
+
         // Auto-dismiss after 2 seconds
         setTimeout(() => {
           get().dismissChallenge();
         }, 2000);
       }
-      
+
       // Show challenge reveal overlay when challenge is resolved
       if (event.type === 'CHALLENGE_RESOLVED') {
         // Determine who receives the pile (the loser)
         const receiverId = event.wasLie ? event.accusedId : event.challengerId;
-        
-        set({ 
+
+        set({
           activeChallenge: null,
           challengeReveal: {
             revealedCards: event.revealedCards,
@@ -508,26 +508,26 @@ export const useGameStore = create<GameStore>()(
             receiverId,
           },
         });
-        
+
         // Auto-dismiss after 3 seconds
         setTimeout(() => {
           get().dismissChallengeReveal();
         }, 3000);
       }
-      
+
       get().updateObservation();
     },
-    
+
     // Override dismissVictoryOverlay - game continues after first player wins!
     dismissVictoryOverlay: () => {
       const { pendingWinnerId, gameSpeed } = get();
-      set({ 
+      set({
         showVictoryOverlay: false,
         pendingWinnerId: null,
         winnerId: pendingWinnerId,
         // DO NOT set uiPhase to gameOver here - game continues until GAME_OVER event
       });
-      
+
       // Continue bot processing after victory overlay
       setTimeout(() => get().processBotTurn(), Math.max(50, 300 / gameSpeed));
     },
