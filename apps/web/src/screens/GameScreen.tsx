@@ -7,7 +7,6 @@ import { VictoryOverlay } from '../components/VictoryOverlay';
 import { ChallengeIndicator } from '../components/ChallengeIndicator';
 import { ChallengeRevealOverlay } from '../components/ChallengeRevealOverlay';
 import { SpeedControl } from '../components/SpeedControl';
-import { Logo } from '../components/Logo';
 import { useGameStore } from '../store/game-store';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
@@ -44,14 +43,9 @@ export function GameScreen() {
       <div className="flex-1 relative min-h-0 w-full">
         <GameTable />
 
-        {/* Logo in top-left corner */}
-        <div className="absolute top-safe-top left-4 z-20 pt-2">
-          <Logo size="sm" variant="light" showTitle={false} animate={false} />
-        </div>
-
-        {/* EventLog: Top right, under safe area */}
+        {/* EventLog: Top right corner */}
         {!debugMode && (
-          <div className="absolute top-safe-top right-4 z-20 pt-12 sm:pt-2 pointer-events-none">
+          <div className="absolute top-2 right-2 z-20 pointer-events-none pt-safe-top">
             <div className="pointer-events-auto">
               <EventLog />
             </div>

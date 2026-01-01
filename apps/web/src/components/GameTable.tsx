@@ -19,13 +19,13 @@ export function GameTable() {
   const positions = PLAYER_POSITIONS[playerCount] ?? PLAYER_POSITIONS[4]!;
 
   // In spectator mode, show all players; otherwise filter out human
-  const displayedPlayers = isSpectator 
-    ? playerConfigs 
+  const displayedPlayers = isSpectator
+    ? playerConfigs
     : playerConfigs.filter((p) => p.id !== humanPlayerId);
-  
+
   // In spectator mode, use all positions; otherwise skip bottom (human's position)
-  const playerPositions = isSpectator 
-    ? positions 
+  const playerPositions = isSpectator
+    ? positions
     : positions.slice(1);
 
   // Get last claim info
@@ -33,6 +33,13 @@ export function GameTable() {
 
   return (
     <div className="relative w-full h-full felt-texture overflow-hidden">
+      {/* Watermark logo - embossed into the felt */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <div className="text-emerald-800/20 text-4xl sm:text-6xl font-serif font-bold tracking-widest rotate-[-5deg] uppercase">
+          Valepaska
+        </div>
+      </div>
+
       {/* Table edge glow */}
       <div className="absolute inset-4 rounded-3xl border border-emerald-700/30 pointer-events-none" />
       <div className="absolute inset-8 rounded-2xl border border-emerald-600/20 pointer-events-none" />
@@ -87,7 +94,7 @@ export function GameTable() {
             </div>
           ) : (
             <div className="w-20 h-28 rounded-lg border-2 border-dashed border-red-500/30 flex items-center justify-center">
-              <span className="text-red-500/50 text-xs text-center">Pakka<br/>tyhjä!</span>
+              <span className="text-red-500/50 text-xs text-center">Pakka<br />tyhjä!</span>
             </div>
           )}
         </div>
@@ -104,7 +111,7 @@ export function GameTable() {
           : (observation.otherHandSizes.get(player.id) ?? 0);
 
         const isCurrentPlayer = observation.currentPlayerId === player.id;
-        
+
         // Check if player has finished
         const standing = standings.find(s => s.playerId === player.id);
         const isFinished = !!standing;
@@ -180,11 +187,9 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
       <motion.div
         animate={isCurrentPlayer ? { scale: [1, 1.02, 1] } : { scale: 1 }}
         transition={{ duration: 1.5, repeat: isCurrentPlayer ? Infinity : 0 }}
-        className={`glass rounded-xl p-3 ${
-          isCurrentPlayer ? 'ring-2 ring-accent-gold shadow-glow-gold' : ''
-        } ${
-          isFinished ? 'opacity-60' : ''
-        }`}
+        className={`glass rounded-xl p-3 ${isCurrentPlayer ? 'ring-2 ring-accent-gold shadow-glow-gold' : ''
+          } ${isFinished ? 'opacity-60' : ''
+          }`}
       >
         {/* Player info */}
         <div className="flex items-center gap-2 mb-2">
@@ -193,16 +198,15 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
             <div className="flex items-center gap-2">
               <div className="text-sm font-medium text-white">{name}</div>
               {isFinished && standing && (
-                <span className={`text-xs font-bold ${
-                  standing.position === 1 ? 'text-accent-gold' : 
-                  standing.position === 2 ? 'text-slate-300' : 
-                  standing.position === 3 ? 'text-amber-600' : 
-                  'text-slate-500'
-                }`}>
-                  {standing.position === 1 ? '🏆' : 
-                   standing.position === 2 ? '🥈' : 
-                   standing.position === 3 ? '🥉' : 
-                   `${standing.position}.`}
+                <span className={`text-xs font-bold ${standing.position === 1 ? 'text-accent-gold' :
+                    standing.position === 2 ? 'text-slate-300' :
+                      standing.position === 3 ? 'text-amber-600' :
+                        'text-slate-500'
+                  }`}>
+                  {standing.position === 1 ? '🏆' :
+                    standing.position === 2 ? '🥈' :
+                      standing.position === 3 ? '🥉' :
+                        `${standing.position}.`}
                 </span>
               )}
             </div>
@@ -240,9 +244,8 @@ function OpponentSlot({ position, name, avatar, handSize, isCurrentPlayer, diffi
 
         {/* Card count */}
         <div className="text-center mt-2">
-          <span className={`text-xs font-medium ${
-            handSize === 0 ? 'text-red-400' : 'text-slate-400'
-          }`}>
+          <span className={`text-xs font-medium ${handSize === 0 ? 'text-red-400' : 'text-slate-400'
+            }`}>
             {handSize} korttia
           </span>
         </div>
