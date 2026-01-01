@@ -18,6 +18,17 @@ import { createEventSlice, type EventSlice } from './slices/event-slice.js';
 import { createBotSlice, type BotSlice } from './slices/bot-slice.js';
 import { createDebugSlice, type DebugSlice } from './slices/debug-slice.js';
 
+// Module-level timer reference to prevent overlapping challenge timers
+let activeChallengeTimer: ReturnType<typeof setInterval> | null = null;
+
+// Helper to clear the active challenge timer
+function clearChallengeTimer() {
+  if (activeChallengeTimer) {
+    clearInterval(activeChallengeTimer);
+    activeChallengeTimer = null;
+  }
+}
+
 // Combined store interface
 export interface GameStore extends 
   GameStateSlice,
@@ -118,6 +129,9 @@ export const useGameStore = create<GameStore>()(
     },
     
     resetGame: () => {
+      // Clear any active challenge timer
+      clearChallengeTimer();
+      
       set({
         uiPhase: 'start',
         engine: null,
@@ -149,6 +163,9 @@ export const useGameStore = create<GameStore>()(
         return;
       }
       
+      // Clear any existing challenge timer
+      clearChallengeTimer();
+      
       const move = createPlayMove(humanPlayerId, selectedCards, selectedRank, selectedCards.length);
       engine.submitMove(humanPlayerId, move);
       
@@ -161,28 +178,20 @@ export const useGameStore = create<GameStore>()(
       
       get().updateObservation();
       
-      // Start challenge window timer
-      const timer = setInterval(() => {
-        const { challengeTimeLeft, showChallengeModal, engine } = get();
-        if (!showChallengeModal || !engine) {
-          clearInterval(timer);
+      // Start challenge window timer for human's own play
+      activeChallengeTimer = setInterval(() => {
+        const { challengeTimeLeft, showChallengeModal, engine: eng, humanPlayerId: hpId } = get();
+        if (!showChallengeModal || !eng) {
+          clearChallengeTimer();
           return;
         }
         
         if (challengeTimeLeft <= 0) {
-          clearInterval(timer);
+          clearChallengeTimer();
           
-          // Check who made the last play - they can't challenge themselves
-          const state = engine.getState();
-          const lastPlayerId = state.lastPlay?.playerId;
-          
-          // Only submit challenge decision if human didn't make the last play
-          if (lastPlayerId !== humanPlayerId) {
-            engine.submitChallengeDecision(humanPlayerId, false);
-          }
-          
-          get().processBotChallenges(); // Let bots decide
-          engine.processChallenges(); // Process all decisions
+          // Bots decide whether to challenge human's play
+          get().processBotChallenges();
+          eng.processChallenges();
           
           set({ showChallengeModal: false });
           get().updateObservation();
@@ -198,6 +207,9 @@ export const useGameStore = create<GameStore>()(
     challenge: () => {
       const { engine, humanPlayerId, observation } = get();
       if (!engine || !humanPlayerId || !observation) return;
+      
+      // Clear the challenge timer immediately
+      clearChallengeTimer();
       
       // Check who made the last play - can't challenge yourself
       const state = engine.getState();
@@ -223,6 +235,9 @@ export const useGameStore = create<GameStore>()(
     pass: () => {
       const { engine, humanPlayerId } = get();
       if (!engine || !humanPlayerId) return;
+      
+      // Clear the challenge timer immediately
+      clearChallengeTimer();
       
       // Check who made the last play
       const state = engine.getState();
@@ -268,8 +283,11 @@ export const useGameStore = create<GameStore>()(
     },
     
     processBotTurn: () => {
-      const { engine, humanPlayerId, uiPhase, isSpectator } = get();
+      const { engine, humanPlayerId, uiPhase, isSpectator, showChallengeModal } = get();
       if (!engine || uiPhase !== 'playing') return;
+      
+      // Don't process if challenge modal is already showing
+      if (showChallengeModal) return;
       
       const state = engine.getState();
       if (state.phase === 'GAME_OVER') {
@@ -287,50 +305,65 @@ export const useGameStore = create<GameStore>()(
         return;
       }
       
-      // If waiting for challenges (for human player only)
+      // If waiting for challenges - show modal to human FIRST before bots decide
       if (state.phase === 'WAITING_FOR_CHALLENGES' && !isSpectator) {
-        // For human player, show challenge window with enough time to react
-        set({ showChallengeModal: true, challengeTimeLeft: 5 });
+        const lastPlayerId = state.lastPlay?.playerId;
         
-        const timer = setInterval(() => {
-          const { challengeTimeLeft, showChallengeModal, engine: eng, humanPlayerId: hpId } = get();
-          if (!showChallengeModal || !eng) {
-            clearInterval(timer);
-            return;
-          }
+        // Only show challenge modal if it's NOT human's own play
+        // (human's own play is handled in playCards())
+        if (lastPlayerId !== humanPlayerId) {
+          // Clear any existing timer before starting a new one
+          clearChallengeTimer();
           
-          if (challengeTimeLeft <= 0) {
-            clearInterval(timer);
+          // Set modal visible
+          set({ showChallengeModal: true, challengeTimeLeft: 5 });
+          
+          // Start countdown timer
+          activeChallengeTimer = setInterval(() => {
+            const { challengeTimeLeft, showChallengeModal: modalShowing, engine: eng, humanPlayerId: hpId } = get();
             
-            // Check who made the last play
-            const st = eng.getState();
-            const lastPlayerId = st.lastPlay?.playerId;
-            
-            // Human passes (only if they didn't make the play)
-            if (hpId && lastPlayerId !== hpId) {
-              eng.submitChallengeDecision(hpId, false);
+            if (!modalShowing || !eng) {
+              clearChallengeTimer();
+              return;
             }
-            get().processBotChallenges();
-            eng.processChallenges();
             
-            set({ showChallengeModal: false });
-            get().updateObservation();
-            const { gameSpeed } = get();
-            setTimeout(() => get().processBotTurn(), Math.max(50, 100 / gameSpeed));
-            return;
-          }
+            if (challengeTimeLeft <= 0) {
+              clearChallengeTimer();
+              
+              // Human passes (timeout)
+              if (hpId) {
+                eng.submitChallengeDecision(hpId, false);
+              }
+              get().processBotChallenges();
+              eng.processChallenges();
+              
+              set({ showChallengeModal: false });
+              get().updateObservation();
+              const { gameSpeed } = get();
+              setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
+              return;
+            }
+            
+            set({ challengeTimeLeft: challengeTimeLeft - 1 });
+          }, 1000);
           
-          set({ challengeTimeLeft: challengeTimeLeft - 1 });
-        }, 1000); // 1 second countdown for human-friendly timing
-        
-        return;
+          return;
+        } else {
+          // It's human's own play - bots decide and process
+          get().processBotChallenges();
+          engine.processChallenges();
+          get().updateObservation();
+          const { gameSpeed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 200 / gameSpeed));
+          return;
+        }
       }
       
-      // Use engine.tick() for bot turns - it handles everything correctly
+      // Bot's turn to play - make ONE move only, then check for challenges
       const { gameSpeed } = get();
       setTimeout(() => {
-        const { engine: eng, uiPhase: phase } = get();
-        if (!eng || phase !== 'playing') return;
+        const { engine: eng, uiPhase: phase, showChallengeModal: modalUp } = get();
+        if (!eng || phase !== 'playing' || modalUp) return;
         
         const currentState = eng.getState();
         if (currentState.phase === 'GAME_OVER') {
@@ -338,17 +371,42 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
-        // Use tick() which properly handles active players and challenges
-        const didSomething = eng.tick();
-        get().updateObservation();
-
-        const nextState = eng.getState();
-
-        if (didSomething && nextState.phase !== 'GAME_OVER') {
-          const { gameSpeed: currentSpeed } = get();
-          setTimeout(() => get().processBotTurn(), Math.max(50, 100 / currentSpeed));
+        // Only process if it's a bot's turn to PLAY (not challenge phase)
+        if (currentState.phase !== 'WAITING_FOR_PLAY') {
+          // Shouldn't happen, but recurse to handle
+          get().processBotTurn();
+          return;
         }
-      }, Math.max(50, 150 / gameSpeed));
+        
+        const player = currentState.players[currentState.currentPlayerIndex];
+        if (!player || player.id === humanPlayerId) {
+          get().updateObservation();
+          return;
+        }
+        
+        // Bot makes a play
+        const { bots } = get();
+        const bot = bots.get(player.id);
+        if (bot) {
+          const observation = eng.getObservation(player.id);
+          const move = bot.chooseMove(observation);
+          eng.submitMove(player.id, move);
+        }
+        
+        get().updateObservation();
+        
+        // Now check if we need to show challenge modal
+        const afterPlayState = eng.getState();
+        if (afterPlayState.phase === 'WAITING_FOR_CHALLENGES') {
+          // Recurse to show the challenge modal
+          const { gameSpeed: speed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 200 / speed));
+        } else {
+          // Continue with next turn
+          const { gameSpeed: speed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 200 / speed));
+        }
+      }, Math.max(50, 200 / gameSpeed));
     },
     
     processBotChallenges: () => {
