@@ -66,9 +66,9 @@ export function ChallengeRevealOverlay({
           {/* Revealed cards with flip animation */}
           <div className="flex gap-3 perspective-1000">
             {revealedCards.map((card, index) => (
-              <FlipCard 
-                key={card.id} 
-                card={card} 
+              <FlipCard
+                key={card.id}
+                card={card}
                 delay={0.5 + index * 0.15}
                 claimedRank={claimedRank}
               />
@@ -80,17 +80,21 @@ export function ChallengeRevealOverlay({
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.5 + revealedCards.length * 0.15 + 0.3, type: 'spring', bounce: 0.5 }}
-            className={`text-center px-8 py-4 rounded-2xl ${
-              wasLie 
-                ? 'bg-red-500/20 border-2 border-red-500' 
-                : 'bg-green-500/20 border-2 border-green-500'
-            }`}
+            className={`text-center px-8 py-6 rounded-2xl shadow-2xl backdrop-blur-md ${wasLie
+                ? 'bg-gradient-to-br from-red-900/90 to-slate-900/90 border-2 border-red-500'
+                : 'bg-gradient-to-br from-green-900/90 to-slate-900/90 border-2 border-green-500'
+              }`}
           >
-            <div className={`text-4xl font-black ${wasLie ? 'text-red-400' : 'text-green-400'}`}>
-              {wasLie ? '🎭 VALE!' : '✓ TOTTA!'}
+            <div className={`text-5xl font-black mb-2 ${wasLie ? 'text-red-400 drop-shadow-glow' : 'text-green-400 drop-shadow-glow'}`}>
+              {wasLie ? '🎭 VALE!' : '✨ TOTTA!'}
             </div>
-            <div className="text-slate-300 mt-2">
-              {receiverName} nostaa pakan
+
+            <div className="flex flex-col items-center gap-2 mt-4">
+              <span className="text-slate-300 text-xs uppercase tracking-widest font-bold opacity-80">Rangaistus</span>
+              <div className="text-xl sm:text-2xl font-bold text-white bg-black/40 px-6 py-3 rounded-xl border border-white/10 flex items-center gap-3">
+                <span className="text-2xl">🃏</span>
+                <span>{receiverName} <span className="font-normal text-slate-300">nostaa pakan</span></span>
+              </div>
             </div>
           </motion.div>
 
@@ -134,9 +138,8 @@ function FlipCard({ card, delay, claimedRank }: FlipCardProps) {
     >
       {/* Card front */}
       <motion.div
-        className={`absolute inset-0 rounded-lg bg-white shadow-xl overflow-hidden backface-hidden ${
-          isMatchingRank ? 'ring-2 ring-green-400' : 'ring-2 ring-red-400'
-        }`}
+        className={`absolute inset-0 rounded-lg bg-white shadow-xl overflow-hidden backface-hidden ${isMatchingRank ? 'ring-2 ring-green-400' : 'ring-2 ring-red-400'
+          }`}
         style={{ backfaceVisibility: 'hidden' }}
       >
         <div className="w-full h-full p-2 flex flex-col justify-between">
@@ -145,19 +148,19 @@ function FlipCard({ card, delay, claimedRank }: FlipCardProps) {
             <div className="text-lg font-bold">{rankDisplay}</div>
             <div className="text-xl">{suitSymbol}</div>
           </div>
-          
+
           {/* Center */}
           <div className={`${colorClass} text-4xl text-center`}>
             {suitSymbol}
           </div>
-          
+
           {/* Bottom right */}
           <div className={`${colorClass} text-right leading-none rotate-180`}>
             <div className="text-lg font-bold">{rankDisplay}</div>
             <div className="text-xl">{suitSymbol}</div>
           </div>
         </div>
-        
+
         {/* Match indicator */}
         {isMatchingRank && (
           <motion.div
