@@ -299,8 +299,11 @@ export const useGameStore = create<GameStore>()(
       if (!currentPlayer) return;
       const currentPlayerId = currentPlayer.id;
 
-      // If it's human's turn and not spectator, don't process
-      if (currentPlayerId === humanPlayerId && !isSpectator) {
+      // Check if human is still an active player (hasn't finished yet)
+      const humanIsActive = humanPlayerId && state.activePlayerIds.includes(humanPlayerId);
+
+      // If it's human's turn, human is still active, and not spectator, don't process
+      if (currentPlayerId === humanPlayerId && humanIsActive && !isSpectator) {
         get().updateObservation();
         return;
       }
@@ -379,7 +382,9 @@ export const useGameStore = create<GameStore>()(
         }
 
         const player = currentState.players[currentState.currentPlayerIndex];
-        if (!player || player.id === humanPlayerId) {
+        // Check if human is still active (hasn't finished)
+        const humanStillActive = humanPlayerId && currentState.activePlayerIds.includes(humanPlayerId);
+        if (!player || (player.id === humanPlayerId && humanStillActive)) {
           get().updateObservation();
           return;
         }
