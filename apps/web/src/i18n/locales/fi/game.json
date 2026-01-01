@@ -1,0 +1,57 @@
+{
+  "ranks": {
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "7",
+    "8": "8",
+    "9": "9",
+    "10": "10",
+    "J": "J",
+    "Q": "Q",
+    "K": "K",
+    "A": "A",
+    "2": "2"
+  },
+  "suits": {
+    "hearts": "Hertta",
+    "diamonds": "Ruutu",
+    "clubs": "Risti",
+    "spades": "Pata"
+  },
+  "claims": {
+    "playerClaims": "{{player}} väittää:",
+    "claimed": "väitti",
+    "cards": "{{count}} korttia",
+    "card": "{{count}} kortti"
+  },
+  "actions": {
+    "played": "{{player}} pelasi {{count}}× {{rank}}",
+    "challenged": "{{challenger}} haastoi {{accused}}!",
+    "picksUp": "{{player}} nostaa pakan",
+    "drew": "{{player}} nosti {{count}} korttia"
+  },
+  "results": {
+    "wasLie": "Vale paljastui!",
+    "wasTruth": "Totta oli!",
+    "lie": "VALE!",
+    "truth": "TOTTA!",
+    "penalty": "Rangaistus"
+  },
+  "burn": {
+    "title": "Pöytä kaatui:",
+    "ten": "kympit kaataa",
+    "ace": "ässä kaataa",
+    "fourInRow": "neljä samaa kaataa"
+  },
+  "phases": {
+    "waitingForPlay": "Odotetaan muita pelaajia...",
+    "waitingForChallenges": "Odotetaan haastoikkunaa..."
+  },
+  "status": {
+    "yourTurn": "Sinun vuorosi",
+    "turn": "Vuoro: {{player}}"
+  }
+}
+

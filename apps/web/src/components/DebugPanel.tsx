@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import type { GameEvent, Rank } from '@valepaska/core';
 import { RANK_DISPLAY } from '../types';
 
 export function DebugPanel() {
+  const { t: tCommon } = useTranslation('common');
+  const { t: tGame } = useTranslation('game');
+  const { t: tUi } = useTranslation('ui');
   const [copied, setCopied] = useState(false);
   const engine = useGameStore((state) => state.engine);
   const events = useGameStore((state) => state.events);
@@ -26,21 +30,31 @@ export function DebugPanel() {
   const formatEvent = (event: GameEvent): string => {
     switch (event.type) {
       case 'GAME_STARTED':
-        return `🎮 Peli alkoi (${event.playerIds?.length ?? 0} pelaajaa)`;
+        return `🎮 ${tUi('gameScreen.events.gameStarted')} (${event.playerIds?.length ?? 0} ${tCommon('player.player')})`;
       case 'PLAY_MADE':
-        return `🃏 ${getPlayerName(event.playerId)} pelasi ${event.claimCount}× ${displayRank(event.claimRank)}`;
+        return `🃏 ${tGame('actions.played', {
+          player: getPlayerName(event.playerId),
+          count: event.claimCount,
+          rank: displayRank(event.claimRank)
+        })}`;
       case 'CHALLENGE_DECLARED':
-        return `⚡ ${getPlayerName(event.challengerId)} haastoi ${getPlayerName(event.accusedId)}`;
+        return `⚡ ${tGame('actions.challenged', {
+          challenger: getPlayerName(event.challengerId),
+          accused: getPlayerName(event.accusedId)
+        })}`;
       case 'CHALLENGE_RESOLVED':
-        return `${event.wasLie ? '😱 VALE!' : '✅ Totta'} → ${getPlayerName(event.wasLie ? event.accusedId : event.challengerId)} nostaa pakan`;
+        return `${event.wasLie ? `😱 ${tGame('results.lie')}` : `✅ ${tGame('results.truth')}`} → ${tGame('actions.picksUp', { player: getPlayerName(event.wasLie ? event.accusedId : event.challengerId) })}`;
       case 'PILE_BURNED':
-        return `🔥 KAATO: ${event.reason}`;
+        return `🔥 ${tGame('burn.title')} ${event.reason}`;
       case 'CARDS_DRAWN':
-        return `📥 ${getPlayerName(event.playerId)} nosti ${event.cardCount} korttia`;
+        return `📥 ${tGame('actions.drew', {
+          player: getPlayerName(event.playerId),
+          count: event.cardCount
+        })}`;
       case 'TURN_ADVANCED':
-        return `➡️ Vuoro: ${getPlayerName(event.currentPlayerId)}`;
+        return `➡️ ${tGame('status.turn', { player: getPlayerName(event.currentPlayerId) })}`;
       case 'PLAYER_WON':
-        return `🏆 ${getPlayerName(event.winnerId)} VOITTI!`;
+        return `🏆 ${tUi('gameOverScreen.winnerWon', { winner: getPlayerName(event.winnerId) })}`;
       default:
         return event.type;
     }
@@ -69,10 +83,10 @@ export function DebugPanel() {
       <div className="bg-bg-elevated px-4 py-2 border-b border-slate-700">
         <div className="flex items-center gap-2">
           <span className="text-lg">🔧</span>
-          <span className="text-sm font-medium text-white">Debug Panel</span>
+          <span className="text-sm font-medium text-white">{tUi('debugPanel.title')}</span>
           {isProcessingBots && (
             <span className="ml-auto text-xs bg-accent-gold text-bg-deep px-2 py-0.5 rounded-full animate-pulse">
-              Botti ajattelee...
+              {tUi('debugPanel.botThinking')}
             </span>
           )}
         </div>
@@ -80,10 +94,10 @@ export function DebugPanel() {
 
       {/* Game State */}
       <div className="p-3 border-b border-slate-800">
-        <h3 className="text-xs font-medium text-slate-400 mb-2">PELIN TILA</h3>
+        <h3 className="text-xs font-medium text-slate-400 mb-2">{tUi('debugPanel.gameState')}</h3>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="bg-bg-surface rounded p-2">
-            <div className="text-slate-400">Vaihe</div>
+            <div className="text-slate-400">{tUi('debugPanel.phase')}</div>
             <div className={`font-mono font-medium ${state.phase === 'GAME_OVER' ? 'text-accent-gold' :
               state.phase === 'WAITING_FOR_CHALLENGES' ? 'text-red-400' :
                 'text-accent-ice'
@@ -92,18 +106,18 @@ export function DebugPanel() {
             </div>
           </div>
           <div className="bg-bg-surface rounded p-2">
-            <div className="text-slate-400">Kierros</div>
+            <div className="text-slate-400">{tUi('debugPanel.round')}</div>
             <div className="font-mono font-medium text-white">{state.roundNumber}</div>
           </div>
           <div className="bg-bg-surface rounded p-2">
-            <div className="text-slate-400">Vuorossa</div>
+            <div className="text-slate-400">{tUi('debugPanel.currentTurn')}</div>
             <div className="font-medium text-white truncate">
               {currentPlayer?.name ?? 'N/A'}
               {currentPlayer?.id === humanPlayerId && ' 👤'}
             </div>
           </div>
           <div className="bg-bg-surface rounded p-2">
-            <div className="text-slate-400">Pelaaja #</div>
+            <div className="text-slate-400">{tUi('debugPanel.playerNumber')}</div>
             <div className="font-mono font-medium text-white">
               {state.currentPlayerIndex + 1}/{state.players.length}
             </div>
@@ -113,19 +127,19 @@ export function DebugPanel() {
 
       {/* Piles */}
       <div className="p-3 border-b border-slate-800">
-        <h3 className="text-xs font-medium text-slate-400 mb-2">PINOT</h3>
+        <h3 className="text-xs font-medium text-slate-400 mb-2">{tUi('debugPanel.piles.title')}</h3>
         <div className="flex gap-2">
           <div className="flex-1 bg-bg-surface rounded p-2 text-center">
             <div className="text-2xl font-bold text-white">{state.tablePile.length}</div>
-            <div className="text-xs text-slate-400">Pöytä</div>
+            <div className="text-xs text-slate-400">{tUi('debugPanel.piles.table')}</div>
           </div>
           <div className="flex-1 bg-bg-surface rounded p-2 text-center">
             <div className="text-2xl font-bold text-white">{state.drawPile.length}</div>
-            <div className="text-xs text-slate-400">Nosto</div>
+            <div className="text-xs text-slate-400">{tUi('debugPanel.piles.draw')}</div>
           </div>
           <div className="flex-1 bg-bg-surface rounded p-2 text-center">
             <div className="text-2xl font-bold text-white">{state.burnPile.length}</div>
-            <div className="text-xs text-slate-400">Pois</div>
+            <div className="text-xs text-slate-400">{tUi('debugPanel.piles.burn')}</div>
           </div>
         </div>
       </div>
@@ -133,17 +147,17 @@ export function DebugPanel() {
       {/* Last Claim */}
       {state.lastPlay && (
         <div className="p-3 border-b border-slate-800">
-          <h3 className="text-xs font-medium text-slate-400 mb-2">VIIMEISIN PELI</h3>
+          <h3 className="text-xs font-medium text-slate-400 mb-2">{tUi('debugPanel.lastPlay.title')}</h3>
           <div className="bg-bg-surface rounded p-2">
             <div className="text-sm text-white">
               <span className="font-medium">{getPlayerName(state.lastPlay.playerId)}</span>
-              {' pelasi '}
+              {` ${tUi('debugPanel.lastPlay.played')} `}
               <span className="text-accent-gold font-bold">
                 {state.lastPlay.claimCount}× {displayRank(state.lastPlay.claimRank)}
               </span>
             </div>
             <div className="text-xs text-slate-400 mt-1">
-              Todelliset kortit: {state.lastPlay.cards.map(c =>
+              {tUi('debugPanel.lastPlay.actualCards')} {state.lastPlay.cards.map(c =>
                 `${RANK_DISPLAY[c.rank]}${c.suit === 'hearts' || c.suit === 'diamonds' ? '♥' : '♠'}`
               ).join(', ')}
             </div>
@@ -153,7 +167,7 @@ export function DebugPanel() {
 
       {/* Hand sizes */}
       <div className="p-3 border-b border-slate-800">
-        <h3 className="text-xs font-medium text-slate-400 mb-2">KÄSIEN KOOT</h3>
+        <h3 className="text-xs font-medium text-slate-400 mb-2">{tUi('debugPanel.handSizes.title')}</h3>
         <div className="space-y-1">
           {state.players.map((player, i) => {
             const hand = state.hands.get(player.id);
@@ -170,7 +184,7 @@ export function DebugPanel() {
                 </span>
                 <span className={`font-mono font-medium ${hand?.length === 0 ? 'text-red-400' : ''
                   }`}>
-                  {hand?.length ?? 0} korttia
+                  {hand?.length ?? 0} {tUi('debugPanel.handSizes.cards')}
                 </span>
               </div>
             );
@@ -182,7 +196,7 @@ export function DebugPanel() {
       <div className="flex-1 overflow-hidden flex flex-col">
         <div className="p-3 pb-0 flex items-center justify-between">
           <h3 className="text-xs font-medium text-slate-400">
-            TAPAHTUMAT ({events.length})
+            {tUi('debugPanel.events')} ({events.length})
           </h3>
           <button
             onClick={handleCopyEvents}
@@ -191,7 +205,7 @@ export function DebugPanel() {
                 : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-600'
               }`}
           >
-            {copied ? 'Kopioitu!' : 'Kopioi JSON'}
+            {copied ? tCommon('buttons.copied') : tCommon('buttons.copyJson')}
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-3">

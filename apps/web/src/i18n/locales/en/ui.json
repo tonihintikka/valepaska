@@ -1,0 +1,90 @@
+{
+  "startScreen": {
+    "subtitle": "Finnish bluffing card game",
+    "tagline": "Claim a rank • Bluff • Challenge",
+    "presets": {
+      "playerVsBots": "Player vs Bots",
+      "botsVsBots": "Bots vs Bots",
+      "challengeMode": "Challenge Mode"
+    },
+    "players": {
+      "title": "Players",
+      "placeholder": "Player {{index}}",
+      "minWarning": "Select min. 2",
+      "spectateMode": "Spectator mode"
+    },
+    "settings": {
+      "debugMode": "Debug mode"
+    }
+  },
+  "gameScreen": {
+    "spectatorBanner": "Spectator mode - Watching bots play",
+    "yourTurn": "Your turn",
+    "yourHand": "Your hand ({{count}} cards)",
+    "selected": "selected",
+    "emptyHand": "Your hand is empty!",
+    "events": {
+      "title": "Events",
+      "gameStarted": "Game started!"
+    },
+    "actionBar": {
+      "selectCards": "Select 1-4 cards to play",
+      "selectRank": "Choose rank to claim ({{count}} cards)",
+      "play": "Play {{count}}× {{rank}}"
+    },
+    "challenge": {
+      "clickToContinue": "Click to continue..."
+    }
+  },
+  "gameOverScreen": {
+    "gameOver": "Game Over!",
+    "youWon": "You Won!",
+    "youLost": "You Lost!",
+    "congratulations": "Congratulations! You're a master bluffer!",
+    "winnerWon": "{{winner}} won the game!",
+    "loserWon": "{{winner}} won the game",
+    "leaderboard": "Leaderboard",
+    "stats": {
+      "title": "Game Stats",
+      "winner": "Winner",
+      "difficulty": "Difficulty"
+    },
+    "loser": "Bullshitter"
+  },
+  "victoryOverlay": {
+    "won": "WON!",
+    "continues": "Game continues - who becomes the Bullshitter?"
+  },
+  "debugPanel": {
+    "title": "Debug Panel",
+    "botThinking": "Bot thinking...",
+    "gameState": "GAME STATE",
+    "phase": "Phase",
+    "round": "Round",
+    "currentTurn": "Current turn",
+    "playerNumber": "Player #",
+    "piles": {
+      "title": "PILES",
+      "table": "Table",
+      "draw": "Draw",
+      "burn": "Burn"
+    },
+    "lastPlay": {
+      "title": "LAST PLAY",
+      "played": "played",
+      "actualCards": "Actual cards:"
+    },
+    "handSizes": {
+      "title": "HAND SIZES",
+      "cards": "cards"
+    },
+    "events": "EVENTS"
+  },
+  "speedControl": {
+    "slow": "Slow",
+    "normal": "Normal",
+    "fast": "Fast",
+    "instant": "Instant"
+  }
+}
+

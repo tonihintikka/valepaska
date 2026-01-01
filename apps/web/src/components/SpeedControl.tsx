@@ -1,18 +1,20 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 
 const SPEED_OPTIONS = [
-  { value: 0.5, label: '0.5×', description: 'Hidas' },
-  { value: 1, label: '1×', description: 'Normaali' },
-  { value: 2, label: '2×', description: 'Nopea' },
-  { value: 4, label: '4×', description: 'Hyvin nopea' },
-];
+  { value: 0.5, label: '0.5×', key: 'slow' },
+  { value: 1, label: '1×', key: 'normal' },
+  { value: 2, label: '2×', key: 'fast' },
+  { value: 4, label: '4×', key: 'instant' },
+] as const;
 
 /**
  * Speed control for spectator mode
  * Allows adjusting how fast bots play
  */
 export function SpeedControl() {
+  const { t: tUi } = useTranslation('ui');
   const gameSpeed = useGameStore((state) => state.gameSpeed);
   const setGameSpeed = useGameStore((state) => state.setGameSpeed);
 
@@ -33,7 +35,7 @@ export function SpeedControl() {
                 : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
               }
             `}
-            title={option.description}
+            title={tUi(`speedControl.${option.key}`)}
           >
             {option.label}
           </motion.button>

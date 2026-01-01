@@ -1,8 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import { RANK_DISPLAY } from '../types';
 
 export function ActionBar() {
+  const { t: tCommon } = useTranslation('common');
+  const { t: tGame } = useTranslation('game');
+  const { t: tUi } = useTranslation('ui');
   const observation = useGameStore((state) => state.observation);
   const selectedCards = useGameStore((state) => state.selectedCards);
   const selectedRank = useGameStore((state) => state.selectedRank);
@@ -54,7 +58,9 @@ export function ActionBar() {
         {/* Claim info */}
         <div className="text-center mb-3">
           <div className="text-xs text-slate-400">
-            {playerConfigs.find((p) => p.id === observation.lastClaim?.playerId)?.name ?? 'Joku'} väittää:
+            {tGame('claims.playerClaims', {
+              player: playerConfigs.find((p) => p.id === observation.lastClaim?.playerId)?.name ?? 'Joku'
+            })}
           </div>
           <div className="text-xl font-bold text-white">
             {observation.lastClaim.count}× {RANK_DISPLAY[observation.lastClaim.rank]}
@@ -69,7 +75,7 @@ export function ActionBar() {
             onClick={pass}
             className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-sm"
           >
-            Usko ({challengeTimeLeft}s)
+            {tCommon('buttons.believe')} ({challengeTimeLeft}s)
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -77,7 +83,7 @@ export function ActionBar() {
             onClick={challenge}
             className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-red-900/50"
           >
-            🔥 VALE!
+            🔥 {tCommon('buttons.challenge')}
           </motion.button>
         </div>
       </motion.div>
@@ -104,7 +110,7 @@ export function ActionBar() {
                 {/* Rank selection */}
                 <div>
                   <div className="text-xs text-slate-400 mb-2 text-center">
-                    Valitse väitettävä arvo ({selectedCards.length} korttia)
+                    {tUi('gameScreen.actionBar.selectRank', { count: selectedCards.length })}
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {validRanks.map((rank) => (
@@ -130,7 +136,7 @@ export function ActionBar() {
                     onClick={clearSelection}
                     className="btn btn-secondary"
                   >
-                    Peruuta
+                    {tCommon('buttons.cancel')}
                   </motion.button>
                   <motion.button
                     {...(canSubmit && { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } })}
@@ -138,7 +144,10 @@ export function ActionBar() {
                     disabled={!canSubmit}
                     className={`btn btn-primary ${!canSubmit ? 'btn-disabled' : ''}`}
                   >
-                    Pelaa {selectedCards.length}× {selectedRank ? RANK_DISPLAY[selectedRank] : '?'}
+                    {tUi('gameScreen.actionBar.play', {
+                      count: selectedCards.length,
+                      rank: selectedRank ? RANK_DISPLAY[selectedRank] : '?'
+                    })}
                   </motion.button>
                 </div>
               </motion.div>
@@ -150,7 +159,7 @@ export function ActionBar() {
                 exit={{ opacity: 0 }}
                 className="text-center text-slate-400"
               >
-                Valitse 1-4 korttia pelataksesi
+                {tUi('gameScreen.actionBar.selectCards')}
               </motion.div>
             ) : (
               <motion.div
@@ -162,8 +171,8 @@ export function ActionBar() {
               >
                 <div className="text-slate-400">
                   {observation.phase === 'WAITING_FOR_CHALLENGES'
-                    ? 'Odotetaan haastoikkunaa...'
-                    : 'Odotetaan muita pelaajia...'
+                    ? tGame('phases.waitingForChallenges')
+                    : tGame('phases.waitingForPlay')
                   }
                 </div>
                 <motion.div

@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+#### Internationalization (i18n) Support (2025-01-02)
+- Added full multi-language support using `react-i18next`
+- Implemented Finnish (fi) and English (en) translations
+- Language switcher component in StartScreen (🇫🇮/🇬🇧 flags)
+- Language preference persisted in localStorage
+- All UI text now translatable:
+  - Start screen (presets, player slots, settings)
+  - Game screen (turn indicators, hand labels, action bar)
+  - Challenge overlays (victory, reveal)
+  - Game over screen (results, leaderboard)
+  - Event log and debug panel
+  - Speed control labels
+- Organized translations into 3 namespaces:
+  - `common`: Shared buttons, player types, difficulty levels
+  - `game`: Card ranks, game mechanics, events, results
+  - `ui`: Screen-specific UI text
+- Auto-detects browser language on first visit
+- Falls back to Finnish if language not available
+- See `docs/I18N_PLAN.md` for implementation details
+
+### Fixed
 #### Progressive Web App (PWA) (2025-01-01)
 - Converted app to installable PWA with offline support.
 - Added Service Worker for asset caching.

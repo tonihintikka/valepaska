@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import { Logo } from '../components/Logo';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import type { BotDifficulty, PlayerConfig } from '../types';
 
 const AVATARS = ['👤', '🤖', '🎩', '🃏', '🦊', '🎭'];
@@ -24,6 +26,8 @@ const DEFAULT_SLOTS: PlayerSlotConfig[] = [
 ];
 
 export function StartScreen() {
+  const { t: tCommon } = useTranslation('common');
+  const { t: tUi } = useTranslation('ui');
   const startGame = useGameStore((state) => state.startGame);
   const [slots, setSlots] = useState<PlayerSlotConfig[]>(DEFAULT_SLOTS);
   const [debugMode, setDebugMode] = useState(false);
@@ -72,35 +76,37 @@ export function StartScreen() {
 
   // Quick preset buttons
   const setPreset = (preset: 'pvb' | 'bvb' | 'hard') => {
+    const you = tCommon('player.you');
+    const bot = tCommon('player.bot');
     switch (preset) {
       case 'pvb': // Player vs 3 bots
         setSlots([
-          { enabled: true, isHuman: true, difficulty: 'Normal', name: 'Sinä' },
-          { enabled: true, isHuman: false, difficulty: 'Easy', name: 'Easy Bot' },
-          { enabled: true, isHuman: false, difficulty: 'Normal', name: 'Normal Bot' },
-          { enabled: true, isHuman: false, difficulty: 'Hard', name: 'Hard Bot' },
-          { enabled: false, isHuman: false, difficulty: 'Easy', name: 'Botti 4' },
-          { enabled: false, isHuman: false, difficulty: 'Normal', name: 'Botti 5' },
+          { enabled: true, isHuman: true, difficulty: 'Normal', name: you },
+          { enabled: true, isHuman: false, difficulty: 'Easy', name: `${tCommon('difficulty.Easy')} ${bot}` },
+          { enabled: true, isHuman: false, difficulty: 'Normal', name: `${tCommon('difficulty.Normal')} ${bot}` },
+          { enabled: true, isHuman: false, difficulty: 'Hard', name: `${tCommon('difficulty.Hard')} ${bot}` },
+          { enabled: false, isHuman: false, difficulty: 'Easy', name: `${bot} 4` },
+          { enabled: false, isHuman: false, difficulty: 'Normal', name: `${bot} 5` },
         ]);
         break;
       case 'bvb': // All bots (spectator)
         setSlots([
-          { enabled: true, isHuman: false, difficulty: 'Easy', name: 'Easy Bot' },
-          { enabled: true, isHuman: false, difficulty: 'Normal', name: 'Normal Bot' },
-          { enabled: true, isHuman: false, difficulty: 'Hard', name: 'Hard Bot' },
-          { enabled: true, isHuman: false, difficulty: 'Pro', name: 'Pro Bot' },
-          { enabled: false, isHuman: false, difficulty: 'Easy', name: 'Botti 4' },
-          { enabled: false, isHuman: false, difficulty: 'Normal', name: 'Botti 5' },
+          { enabled: true, isHuman: false, difficulty: 'Easy', name: `${tCommon('difficulty.Easy')} ${bot}` },
+          { enabled: true, isHuman: false, difficulty: 'Normal', name: `${tCommon('difficulty.Normal')} ${bot}` },
+          { enabled: true, isHuman: false, difficulty: 'Hard', name: `${tCommon('difficulty.Hard')} ${bot}` },
+          { enabled: true, isHuman: false, difficulty: 'Pro', name: `${tCommon('difficulty.Pro')} ${bot}` },
+          { enabled: false, isHuman: false, difficulty: 'Easy', name: `${bot} 4` },
+          { enabled: false, isHuman: false, difficulty: 'Normal', name: `${bot} 5` },
         ]);
         break;
       case 'hard': // Player vs 3 Pro bots
         setSlots([
-          { enabled: true, isHuman: true, difficulty: 'Normal', name: 'Sinä' },
-          { enabled: true, isHuman: false, difficulty: 'Pro', name: 'Pro Bot 1' },
-          { enabled: true, isHuman: false, difficulty: 'Pro', name: 'Pro Bot 2' },
-          { enabled: true, isHuman: false, difficulty: 'Pro', name: 'Pro Bot 3' },
-          { enabled: false, isHuman: false, difficulty: 'Easy', name: 'Botti 4' },
-          { enabled: false, isHuman: false, difficulty: 'Normal', name: 'Botti 5' },
+          { enabled: true, isHuman: true, difficulty: 'Normal', name: you },
+          { enabled: true, isHuman: false, difficulty: 'Pro', name: `${tCommon('difficulty.Pro')} ${bot} 1` },
+          { enabled: true, isHuman: false, difficulty: 'Pro', name: `${tCommon('difficulty.Pro')} ${bot} 2` },
+          { enabled: true, isHuman: false, difficulty: 'Pro', name: `${tCommon('difficulty.Pro')} ${bot} 3` },
+          { enabled: false, isHuman: false, difficulty: 'Easy', name: `${bot} 4` },
+          { enabled: false, isHuman: false, difficulty: 'Normal', name: `${bot} 5` },
         ]);
         break;
     }
@@ -124,6 +130,9 @@ export function StartScreen() {
         >
           {/* Title with tilted card logo */}
           <div className="flex flex-col items-center pt-2">
+            <div className="absolute top-4 right-4">
+              <LanguageSwitcher />
+            </div>
             <Logo size="sm" variant="gold" className="mb-1" />
 
             <motion.p
@@ -132,7 +141,7 @@ export function StartScreen() {
               transition={{ delay: 0.4 }}
               className="text-slate-400 text-center text-sm mb-4"
             >
-              Suomalainen bluffikorttipeli
+              {tUi('startScreen.subtitle')}
             </motion.p>
           </div>
 
@@ -147,19 +156,19 @@ export function StartScreen() {
               onClick={() => setPreset('pvb')}
               className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
             >
-              🎮 Pelaaja vs Botit
+              🎮 {tUi('startScreen.presets.playerVsBots')}
             </button>
             <button
               onClick={() => setPreset('bvb')}
               className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
             >
-              🤖 Botit vs Botit
+              🤖 {tUi('startScreen.presets.botsVsBots')}
             </button>
             <button
               onClick={() => setPreset('hard')}
               className="px-3 py-1.5 text-xs rounded-lg bg-bg-surface text-slate-300 hover:bg-bg-elevated transition-colors border border-slate-700/50"
             >
-              💀 Haaste-moodi
+              💀 {tUi('startScreen.presets.challengeMode')}
             </button>
           </motion.div>
 
@@ -172,7 +181,7 @@ export function StartScreen() {
           >
             <h2 className="text-base font-semibold text-white mb-2 flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <span>Pelaajat</span>
+                <span>{tUi('startScreen.players.title')}</span>
                 <span className="text-sm font-normal text-slate-400">
                   ({enabledCount}/6)
                 </span>
@@ -211,7 +220,7 @@ export function StartScreen() {
                         onChange={(e) => updateSlot(index, { name: e.target.value })}
                         disabled={!slot.enabled}
                         className="w-full bg-transparent text-white text-sm px-2 py-1.5 rounded focus:bg-bg-surface focus:outline-none focus:ring-1 focus:ring-accent-gold/50"
-                        placeholder={`Pelaaja ${index + 1}`}
+                        placeholder={tUi('startScreen.players.placeholder', { index: index + 1 })}
                       />
                     </div>
 
@@ -224,7 +233,7 @@ export function StartScreen() {
                             ? 'bg-accent-gold text-bg-deep'
                             : 'bg-bg-surface text-slate-500 hover:text-slate-300'
                           }`}
-                        title="Ihminen"
+                        title={tCommon('player.human')}
                       >
                         👤
                       </button>
@@ -235,7 +244,7 @@ export function StartScreen() {
                             ? 'bg-accent-ice text-bg-deep'
                             : 'bg-bg-surface text-slate-500 hover:text-slate-300'
                           }`}
-                        title="Botti"
+                        title={tCommon('player.bot')}
                       >
                         🤖
                       </button>
@@ -249,7 +258,7 @@ export function StartScreen() {
                         className="bg-bg-surface text-slate-300 text-xs px-2 py-1.5 rounded border border-slate-700 focus:outline-none focus:border-accent-ice w-20"
                       >
                         {DIFFICULTIES.map(d => (
-                          <option key={d} value={d}>{d}</option>
+                          <option key={d} value={d}>{tCommon(`difficulty.${d}` as const)}</option>
                         ))}
                       </select>
                     )}
@@ -262,12 +271,12 @@ export function StartScreen() {
             <div className="mt-3 flex gap-4 min-h-[1.5em]">
               {humanCount === 0 && (
                 <div className="text-xs text-accent-ice flex items-center gap-1.5">
-                  <span>👁️</span> Seuraat peliä
+                  <span>👁️</span> {tUi('startScreen.players.spectateMode')}
                 </div>
               )}
               {enabledCount < 2 && (
                 <div className="text-xs text-red-400 flex items-center gap-1.5">
-                  <span>⚠️</span> Valitse min. 2
+                  <span>⚠️</span> {tUi('startScreen.players.minWarning')}
                 </div>
               )}
             </div>
@@ -287,7 +296,7 @@ export function StartScreen() {
                 onChange={() => setDebugMode(!debugMode)}
                 className="accent-accent-gold"
               />
-              <span className="text-xs text-slate-400">Debug-tila</span>
+              <span className="text-xs text-slate-400">{tUi('startScreen.settings.debugMode')}</span>
             </label>
           </motion.div>
         </motion.div>
@@ -305,11 +314,11 @@ export function StartScreen() {
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
               }`}
           >
-            {humanCount === 0 ? 'ALOITA KATSELU' : 'ALOITA PELI'}
+            {humanCount === 0 ? tCommon('buttons.startSpectate').toUpperCase() : tCommon('buttons.start').toUpperCase()}
           </motion.button>
 
           <p className="text-slate-500 text-[10px] mt-2 text-center">
-            Väitä arvoa • Bluffaa • Haasta
+            {tUi('startScreen.tagline')}
           </p>
         </div>
       </div>

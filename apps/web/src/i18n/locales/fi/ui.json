@@ -1,0 +1,90 @@
+{
+  "startScreen": {
+    "subtitle": "Suomalainen bluffikorttipeli",
+    "tagline": "Väitä arvoa • Bluffaa • Haasta",
+    "presets": {
+      "playerVsBots": "Pelaaja vs Botit",
+      "botsVsBots": "Botit vs Botit",
+      "challengeMode": "Haaste-moodi"
+    },
+    "players": {
+      "title": "Pelaajat",
+      "placeholder": "Pelaaja {{index}}",
+      "minWarning": "Valitse min. 2",
+      "spectateMode": "Seuraat peliä"
+    },
+    "settings": {
+      "debugMode": "Debug-tila"
+    }
+  },
+  "gameScreen": {
+    "spectatorBanner": "Katselutila - Seuraat bottien peliä",
+    "yourTurn": "Sinun vuorosi",
+    "yourHand": "Sinun kätesi ({{count}} korttia)",
+    "selected": "valittu",
+    "emptyHand": "Kätesi on tyhjä!",
+    "events": {
+      "title": "Tapahtumat",
+      "gameStarted": "Peli alkoi!"
+    },
+    "actionBar": {
+      "selectCards": "Valitse 1-4 korttia pelataksesi",
+      "selectRank": "Valitse väitettävä arvo ({{count}} korttia)",
+      "play": "Pelaa {{count}}× {{rank}}"
+    },
+    "challenge": {
+      "clickToContinue": "Klikkaa jatkaaksesi..."
+    }
+  },
+  "gameOverScreen": {
+    "gameOver": "Peli päättyi!",
+    "youWon": "Voitit!",
+    "youLost": "Hävisit!",
+    "congratulations": "Onneksi olkoon! Olet mestari bluffaaja!",
+    "winnerWon": "{{winner}} voitti pelin!",
+    "loserWon": "{{winner}} voitti pelin",
+    "leaderboard": "Tulostaulukko",
+    "stats": {
+      "title": "Pelin tilastot",
+      "winner": "Voittaja",
+      "difficulty": "Vaikeustaso"
+    },
+    "loser": "Valepaska"
+  },
+  "victoryOverlay": {
+    "won": "VOITTI!",
+    "continues": "Peli jatkuu - kuka jää Valepaskaksi?"
+  },
+  "debugPanel": {
+    "title": "Debug Panel",
+    "botThinking": "Botti ajattelee...",
+    "gameState": "PELIN TILA",
+    "phase": "Vaihe",
+    "round": "Kierros",
+    "currentTurn": "Vuorossa",
+    "playerNumber": "Pelaaja #",
+    "piles": {
+      "title": "PINOT",
+      "table": "Pöytä",
+      "draw": "Nosto",
+      "burn": "Pois"
+    },
+    "lastPlay": {
+      "title": "VIIMEISIN PELI",
+      "played": "pelasi",
+      "actualCards": "Todelliset kortit:"
+    },
+    "handSizes": {
+      "title": "KÄSIEN KOOT",
+      "cards": "korttia"
+    },
+    "events": "TAPAHTUMAT"
+  },
+  "speedControl": {
+    "slow": "Hidas",
+    "normal": "Normaali",
+    "fast": "Nopea",
+    "instant": "Heti"
+  }
+}
+

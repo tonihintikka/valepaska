@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import { Logo } from '../components/Logo';
 
 export function GameOverScreen() {
+  const { t: tCommon } = useTranslation('common');
+  const { t: tUi } = useTranslation('ui');
   const winnerId = useGameStore((state) => state.winnerId);
   const standings = useGameStore((state) => state.standings);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
@@ -84,7 +87,7 @@ export function GameOverScreen() {
             isSpectator ? 'text-accent-gold text-shadow-gold' : isHumanWinner ? 'text-accent-gold text-shadow-gold' : 'text-slate-300'
           }`}
         >
-          {isSpectator ? 'Peli päättyi!' : isHumanWinner ? 'Voitit!' : 'Hävisit!'}
+          {isSpectator ? tUi('gameOverScreen.gameOver') : isHumanWinner ? tUi('gameOverScreen.youWon') : tUi('gameOverScreen.youLost')}
         </motion.h1>
 
         <motion.p
@@ -94,10 +97,10 @@ export function GameOverScreen() {
           className="text-xl text-slate-400 mb-8"
         >
           {isSpectator 
-            ? `${winner?.name ?? 'Botti'} voitti pelin!`
+            ? tUi('gameOverScreen.winnerWon', { winner: winner?.name ?? tCommon('player.bot') })
             : isHumanWinner 
-              ? 'Onneksi olkoon! Olet mestari bluffaaja!' 
-              : `${winner?.name ?? 'Botti'} voitti pelin`
+              ? tUi('gameOverScreen.congratulations')
+              : tUi('gameOverScreen.loserWon', { winner: winner?.name ?? tCommon('player.bot') })
           }
         </motion.p>
 
@@ -109,7 +112,7 @@ export function GameOverScreen() {
             transition={{ delay: 0.6 }}
             className="glass rounded-2xl p-6 mb-8 max-w-2xl mx-auto w-full"
           >
-            <h3 className="text-lg font-medium text-slate-300 mb-4 text-center">Tulostaulukko</h3>
+            <h3 className="text-lg font-medium text-slate-300 mb-4 text-center">{tUi('gameOverScreen.leaderboard')}</h3>
             <div className="space-y-2">
               {standingsWithPlayers.map((standing, index) => {
                 const isLoser = standing.position === standingsWithPlayers.length;
@@ -144,10 +147,10 @@ export function GameOverScreen() {
                           isHuman ? 'text-accent-ice' : 'text-white'
                         }`}>
                           {standing.player?.name}
-                          {isHuman && ' (Sinä)'}
+                          {isHuman && ` (${tCommon('player.you')})`}
                         </div>
                         <div className="text-xs text-slate-400">
-                          {standing.player?.botDifficulty ?? 'Ihminen'}
+                          {standing.player?.botDifficulty ? tCommon(`difficulty.${standing.player.botDifficulty}` as const) : tCommon('player.human')}
                         </div>
                       </div>
                     </div>
@@ -156,7 +159,7 @@ export function GameOverScreen() {
                         {standing.score}p
                       </div>
                       {isLoser && (
-                        <div className="text-xs text-red-400 font-medium">Valepaska</div>
+                        <div className="text-xs text-red-400 font-medium">{tUi('gameOverScreen.loser')}</div>
                       )}
                     </div>
                   </motion.div>
@@ -174,12 +177,12 @@ export function GameOverScreen() {
             transition={{ delay: 0.6 }}
             className="glass rounded-2xl p-6 mb-8 max-w-sm mx-auto"
           >
-            <h3 className="text-lg font-medium text-slate-300 mb-4">Pelin tilastot</h3>
+            <h3 className="text-lg font-medium text-slate-300 mb-4">{tUi('gameOverScreen.stats.title')}</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="text-slate-400">Voittaja</div>
+              <div className="text-slate-400">{tUi('gameOverScreen.stats.winner')}</div>
               <div className="text-white font-medium">{winner?.name}</div>
-              <div className="text-slate-400">Vaikeustaso</div>
-              <div className="text-white font-medium">{winner?.botDifficulty ?? 'Ihminen'}</div>
+              <div className="text-slate-400">{tUi('gameOverScreen.stats.difficulty')}</div>
+              <div className="text-white font-medium">{winner?.botDifficulty ? tCommon(`difficulty.${winner.botDifficulty}` as const) : tCommon('player.human')}</div>
             </div>
           </motion.div>
         )}
@@ -197,7 +200,7 @@ export function GameOverScreen() {
             onClick={resetGame}
             className="btn btn-primary text-lg"
           >
-            Uusi peli
+            {tCommon('buttons.newGame')}
           </motion.button>
         </motion.div>
       </motion.div>

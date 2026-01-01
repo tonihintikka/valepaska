@@ -1,0 +1,26 @@
+{
+  "buttons": {
+    "start": "Aloita peli",
+    "startSpectate": "Aloita katselu",
+    "newGame": "Uusi peli",
+    "cancel": "Peruuta",
+    "continue": "Jatka",
+    "challenge": "VALE!",
+    "believe": "Usko",
+    "copyJson": "Kopioi JSON",
+    "copied": "Kopioitu!"
+  },
+  "player": {
+    "human": "Ihminen",
+    "you": "Sinä",
+    "player": "Pelaaja",
+    "bot": "Botti"
+  },
+  "difficulty": {
+    "Easy": "Helppo",
+    "Normal": "Normaali",
+    "Hard": "Vaikea",
+    "Pro": "Pro"
+  }
+}
+

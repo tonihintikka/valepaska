@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import { Card } from './Card';
 
 export function PlayerHand() {
+  const { t: tUi } = useTranslation('ui');
   const observation = useGameStore((state) => state.observation);
   const selectedCards = useGameStore((state) => state.selectedCards);
   const selectCard = useGameStore((state) => state.selectCard);
@@ -42,10 +44,10 @@ export function PlayerHand() {
       <div className="max-w-4xl mx-auto">
         {/* Hand label */}
         <div className="text-xs text-slate-400 mb-2 text-center">
-          Sinun kätesi ({observation.hand.length} korttia)
+          {tUi('gameScreen.yourHand', { count: observation.hand.length })}
           {selectedCards.length > 0 && (
             <span className="text-accent-gold ml-2">
-              — {selectedCards.length} valittu
+              — {selectedCards.length} {tUi('gameScreen.selected')}
             </span>
           )}
         </div>
@@ -93,7 +95,7 @@ export function PlayerHand() {
         {/* Empty state */}
         {observation.hand.length === 0 && (
           <div className="text-center text-slate-400 py-8">
-            Kätesi on tyhjä!
+            {tUi('gameScreen.emptyHand')}
           </div>
         )}
       </div>

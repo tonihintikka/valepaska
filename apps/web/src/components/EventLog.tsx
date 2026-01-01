@@ -1,9 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import type { GameEvent } from '@valepaska/core';
 import { RANK_DISPLAY } from '../types';
 
 export function EventLog() {
+  const { t: tGame } = useTranslation('game');
+  const { t: tUi } = useTranslation('ui');
   const events = useGameStore((state) => state.events);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
 
@@ -17,28 +20,38 @@ export function EventLog() {
   const formatEvent = (event: GameEvent): string => {
     switch (event.type) {
       case 'PLAY_MADE':
-        return `${getPlayerName(event.playerId)} pelasi ${event.claimCount}× ${RANK_DISPLAY[event.claimRank]}`;
+        return tGame('actions.played', {
+          player: getPlayerName(event.playerId),
+          count: event.claimCount,
+          rank: RANK_DISPLAY[event.claimRank]
+        });
       case 'CHALLENGE_DECLARED':
-        return `${getPlayerName(event.challengerId)} haastoi ${getPlayerName(event.accusedId)}!`;
+        return tGame('actions.challenged', {
+          challenger: getPlayerName(event.challengerId),
+          accused: getPlayerName(event.accusedId)
+        });
       case 'CHALLENGE_RESOLVED':
         return event.wasLie
-          ? `Vale paljastui! ${getPlayerName(event.accusedId)} nostaa pakan`
-          : `Totta oli! ${getPlayerName(event.challengerId)} nostaa pakan`;
+          ? `${tGame('results.wasLie')} ${tGame('actions.picksUp', { player: getPlayerName(event.accusedId) })}`
+          : `${tGame('results.wasTruth')} ${tGame('actions.picksUp', { player: getPlayerName(event.challengerId) })}`;
       case 'PILE_BURNED':
         const reasons = {
-          TEN: 'kympit kaataa',
-          ACE: 'äSSä kaataa',
-          FOUR_IN_ROW: 'neljä samaa kaataa',
+          TEN: tGame('burn.ten'),
+          ACE: tGame('burn.ace'),
+          FOUR_IN_ROW: tGame('burn.fourInRow'),
         };
-        return `🔥 Pöytä kaatui: ${reasons[event.reason]}`;
+        return `🔥 ${tGame('burn.title')} ${reasons[event.reason]}`;
       case 'CARDS_DRAWN':
-        return `${getPlayerName(event.playerId)} nosti ${event.cardCount} korttia`;
+        return tGame('actions.drew', {
+          player: getPlayerName(event.playerId),
+          count: event.cardCount
+        });
       case 'TURN_ADVANCED':
-        return `Vuoro: ${getPlayerName(event.currentPlayerId)}`;
+        return tGame('status.turn', { player: getPlayerName(event.currentPlayerId) });
       case 'PLAYER_WON':
-        return `🏆 ${getPlayerName(event.winnerId)} voitti pelin!`;
+        return `🏆 ${tUi('gameOverScreen.winnerWon', { winner: getPlayerName(event.winnerId) })}`;
       case 'GAME_STARTED':
-        return 'Peli alkoi!';
+        return tUi('gameScreen.events.gameStarted');
       default:
         return '';
     }
@@ -62,7 +75,7 @@ export function EventLog() {
 
   return (
     <div className="w-48 sm:w-72 glass rounded-xl p-2 sm:p-3 max-h-28 sm:max-h-48 overflow-hidden">
-      <div className="text-xs text-slate-400 mb-2 font-medium">Tapahtumat</div>
+      <div className="text-xs text-slate-400 mb-2 font-medium">{tUi('gameScreen.events.title')}</div>
       <div className="space-y-1">
         <AnimatePresence mode="popLayout">
           {recentEvents.map((event, index) => {

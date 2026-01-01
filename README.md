@@ -171,6 +171,12 @@ pnpm build
 - TypeScript Project References for monorepo
 - Strict type checking with `exactOptionalPropertyTypes`
 
+**Internationalization (i18n):**
+- Full multi-language support (Finnish/English)
+- Language switcher with persistent preference
+- All UI text translatable
+- Easy to add new languages (see `docs/I18N_PLAN.md`)
+
 
 ## Development
 

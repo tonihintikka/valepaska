@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface VictoryOverlayProps {
   winnerName: string;
@@ -18,6 +19,7 @@ export function VictoryOverlay({
   onComplete,
   duration = 3,
 }: VictoryOverlayProps) {
+  const { t: tUi } = useTranslation('ui');
   // Auto-dismiss after duration
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -105,7 +107,7 @@ export function VictoryOverlay({
             transition={{ delay: 0.4 }}
             className="text-4xl font-bold text-white mb-4"
           >
-            VOITTI!
+            {tUi('victoryOverlay.won')}
           </motion.div>
           
           {/* Game continues text */}
@@ -115,7 +117,7 @@ export function VictoryOverlay({
             transition={{ delay: 0.6 }}
             className="text-lg text-slate-300 mb-4"
           >
-            Peli jatkuu - kuka jää Valepaskaksi?
+            {tUi('victoryOverlay.continues')}
           </motion.div>
 
           {/* Avatar if provided */}
@@ -137,7 +139,7 @@ export function VictoryOverlay({
             transition={{ delay: 1 }}
             className="text-slate-400 text-sm mt-4"
           >
-            Klikkaa jatkaaksesi...
+            {tUi('gameScreen.challenge.clickToContinue')}
           </motion.p>
         </motion.div>
       </motion.div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { GameTable } from '../components/GameTable';
 import { PlayerHand } from '../components/PlayerHand';
 import { ActionBar } from '../components/ActionBar';
@@ -11,6 +12,7 @@ import { useGameStore } from '../store/game-store';
 import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 
 export function GameScreen() {
+  const { t: tUi } = useTranslation('ui');
   const debugMode = useGameStore((state) => state.debugMode);
   const isSpectator = useGameStore((state) => state.isSpectator);
   const showVictoryOverlay = useGameStore((state) => state.showVictoryOverlay);
@@ -35,7 +37,7 @@ export function GameScreen() {
       {/* Spectator mode banner */}
       {isSpectator && (
         <div className="bg-accent-ice/20 text-accent-ice text-center py-2 text-sm shrink-0">
-          👁️ Katselutila - Seuraat bottien peliä
+          👁️ {tUi('gameScreen.spectatorBanner')}
         </div>
       )}
 

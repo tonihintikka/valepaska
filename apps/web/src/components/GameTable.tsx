@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/game-store';
 import { PileCard } from './Card';
 import { MiniCard } from './MiniCard';
@@ -6,6 +7,7 @@ import { PLAYER_POSITIONS, type PlayerPosition } from '../types';
 import type { Card } from '@valepaska/core';
 
 export function GameTable() {
+  const { t: tUi } = useTranslation('ui');
   const observation = useGameStore((state) => state.observation);
   const gameState = useGameStore((state) => state.gameState);
   const playerConfigs = useGameStore((state) => state.playerConfigs);
@@ -174,7 +176,7 @@ export function GameTable() {
           animate={{ opacity: 1 }}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-accent-gold/20 text-accent-gold px-4 py-2 rounded-full text-sm font-medium"
         >
-          Sinun vuorosi
+          {tUi('gameScreen.yourTurn')}
         </motion.div>
       )}
     </div>

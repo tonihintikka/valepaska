@@ -1,0 +1,26 @@
+{
+  "buttons": {
+    "start": "Start Game",
+    "startSpectate": "Start Spectating",
+    "newGame": "New Game",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "challenge": "LIAR!",
+    "believe": "Believe",
+    "copyJson": "Copy JSON",
+    "copied": "Copied!"
+  },
+  "player": {
+    "human": "Human",
+    "you": "You",
+    "player": "Player",
+    "bot": "Bot"
+  },
+  "difficulty": {
+    "Easy": "Easy",
+    "Normal": "Normal",
+    "Hard": "Hard",
+    "Pro": "Pro"
+  }
+}
+

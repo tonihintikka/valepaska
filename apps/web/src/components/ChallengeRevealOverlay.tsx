@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import type { Card as CardType, Rank } from '@valepaska/core';
 import { RANK_DISPLAY, SUIT_SYMBOLS, SUIT_COLORS } from '../types';
 
@@ -25,6 +26,8 @@ export function ChallengeRevealOverlay({
   receiverName,
   onComplete,
 }: ChallengeRevealOverlayProps) {
+  const { t: tGame } = useTranslation('game');
+  const { t: tUi } = useTranslation('ui');
   return (
     <AnimatePresence {...(onComplete && { onExitComplete: onComplete })}>
       <motion.div
@@ -56,7 +59,7 @@ export function ChallengeRevealOverlay({
             transition={{ delay: 0.3 }}
           >
             <div className="text-slate-400 text-sm mb-1">
-              {accusedName} väitti
+              {tGame('claims.claimed', { player: accusedName })}
             </div>
             <div className="text-2xl font-bold text-white">
               {claimedCount}× {RANK_DISPLAY[claimedRank]}
@@ -86,14 +89,14 @@ export function ChallengeRevealOverlay({
               }`}
           >
             <div className={`text-5xl font-black mb-2 ${wasLie ? 'text-red-400 drop-shadow-glow' : 'text-green-400 drop-shadow-glow'}`}>
-              {wasLie ? '🎭 VALE!' : '✨ TOTTA!'}
+              {wasLie ? `🎭 ${tGame('results.lie')}` : `✨ ${tGame('results.truth')}`}
             </div>
 
             <div className="flex flex-col items-center gap-2 mt-4">
-              <span className="text-slate-300 text-xs uppercase tracking-widest font-bold opacity-80">Rangaistus</span>
+              <span className="text-slate-300 text-xs uppercase tracking-widest font-bold opacity-80">{tGame('results.penalty')}</span>
               <div className="text-xl sm:text-2xl font-bold text-white bg-black/40 px-6 py-3 rounded-xl border border-white/10 flex items-center gap-3">
                 <span className="text-2xl">🃏</span>
-                <span>{receiverName} <span className="font-normal text-slate-300">nostaa pakan</span></span>
+                <span>{tGame('actions.picksUp', { player: receiverName })}</span>
               </div>
             </div>
           </motion.div>
@@ -105,7 +108,7 @@ export function ChallengeRevealOverlay({
             transition={{ delay: 2 }}
             className="text-slate-500 text-sm"
           >
-            Klikkaa jatkaaksesi...
+            {tUi('gameScreen.challenge.clickToContinue')}
           </motion.div>
         </motion.div>
       </motion.div>
