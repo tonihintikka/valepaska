@@ -51,10 +51,12 @@ export function GameScreen() {
           <Logo size="sm" variant="light" showTitle={false} animate={false} />
         </div>
 
-        {/* Event log overlay (only if not in debug mode) */}
+        {/* Event log overlay (adaptive position) */}
         {!debugMode && (
-          <div className="absolute top-safe-top right-4 z-20 pt-2">
-            <EventLog />
+          <div className="absolute bottom-20 left-4 z-20 pointer-events-none sm:top-4 sm:bottom-auto sm:right-4 sm:left-auto">
+            <div className="pointer-events-auto">
+              <EventLog />
+            </div>
           </div>
         )}
       </div>
