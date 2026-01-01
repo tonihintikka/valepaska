@@ -283,11 +283,11 @@ export const useGameStore = create<GameStore>()(
     },
 
     processBotTurn: () => {
-      const { engine, humanPlayerId, uiPhase, isSpectator, showChallengeModal } = get();
+      const { engine, humanPlayerId, uiPhase, isSpectator, showChallengeModal, showVictoryOverlay } = get();
       if (!engine || uiPhase !== 'playing') return;
 
-      // Don't process if challenge modal is already showing
-      if (showChallengeModal) return;
+      // Don't process if challenge modal or victory overlay is showing
+      if (showChallengeModal || showVictoryOverlay) return;
 
       const state = engine.getState();
       if (state.phase === 'GAME_OVER') {
@@ -323,9 +323,9 @@ export const useGameStore = create<GameStore>()(
 
           // Start countdown timer
           activeChallengeTimer = setInterval(() => {
-            const { challengeTimeLeft, showChallengeModal: modalShowing, engine: eng, humanPlayerId: hpId } = get();
+            const { challengeTimeLeft, showChallengeModal: modalShowing, showVictoryOverlay: victoryShowing, engine: eng, humanPlayerId: hpId } = get();
 
-            if (!modalShowing || !eng) {
+            if (!modalShowing || !eng || victoryShowing) {
               clearChallengeTimer();
               return;
             }
@@ -365,8 +365,8 @@ export const useGameStore = create<GameStore>()(
       // Bot's turn to play - make ONE move only, then check for challenges
       const { gameSpeed } = get();
       setTimeout(() => {
-        const { engine: eng, uiPhase: phase, showChallengeModal: modalUp } = get();
-        if (!eng || phase !== 'playing' || modalUp) return;
+        const { engine: eng, uiPhase: phase, showChallengeModal: modalUp, showVictoryOverlay: victoryUp } = get();
+        if (!eng || phase !== 'playing' || modalUp || victoryUp) return;
 
         const currentState = eng.getState();
         if (currentState.phase === 'GAME_OVER') {
@@ -382,9 +382,22 @@ export const useGameStore = create<GameStore>()(
         }
 
         const player = currentState.players[currentState.currentPlayerIndex];
+        if (!player) {
+          get().updateObservation();
+          return;
+        }
+
+        // Check if current player has finished - shouldn't happen but handle gracefully
+        if (!currentState.activePlayerIds.includes(player.id)) {
+          // Player has finished, engine should advance - just recurse
+          const { gameSpeed: speed } = get();
+          setTimeout(() => get().processBotTurn(), Math.max(50, 100 / speed));
+          return;
+        }
+
         // Check if human is still active (hasn't finished)
         const humanStillActive = humanPlayerId && currentState.activePlayerIds.includes(humanPlayerId);
-        if (!player || (player.id === humanPlayerId && humanStillActive)) {
+        if (player.id === humanPlayerId && humanStillActive) {
           get().updateObservation();
           return;
         }
