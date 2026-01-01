@@ -13,8 +13,8 @@ export function createObservation(
   state: GameState,
   playerId: PlayerId
 ): PlayerObservation {
-  // Get player's hand
-  const hand = state.hands.get(playerId) ?? [];
+  // Get player's hand (return a copy to prevent mutation)
+  const hand = [...(state.hands.get(playerId) ?? [])];
 
   // Get other players' hand sizes (not contents!)
   const otherHandSizes = new Map<PlayerId, number>();

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added rigorous test suite for challenge flow verification in `apps/web`.
 - Covers passive waiting, active passing, and strict turn order enforcement.
 
+#### Bot API Strictness Verification (2025-01-01)
+- Implemented strict verification tests for the Bot Observation API.
+- Confirmed bots receive only `PlayerObservation` and cannot access hidden `GameState`.
+- Ensured `hand` arrays are immutable copies to prevent state leaks.
+
 ### Fixed
 #### Challenge Visibility on Bot Turns (2025-01-01)
 Fixed bug where the challenge modal would not appear when a bot played a card.
